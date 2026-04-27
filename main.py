@@ -130,7 +130,9 @@ def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
     "tgxhpskqcpflkbrrwubr",
     "tgxhpskqcphlkbrrwubr",
   )
-  supabase_key = get_required_env("SUPABASE_KEY")
+  supabase_key = os.environ.get("SUPABASE_SERVICE_KEY") or get_required_env(
+    "SUPABASE_KEY"
+  )
   endpoint = f"{supabase_url}/rest/v1/client_coupons"
 
   headers = {
