@@ -152,9 +152,12 @@ def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
 
 
 def build_sales_query():
-  sales_table = get_safe_identifier("CITEL_SALES_TABLE", "FATGOR")
-  cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CPF")
-  amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "TOTAL_FATURAMENTO")
+  sales_table = get_safe_identifier("CITEL_SALES_TABLE", "CPPGER")
+  client_table = get_safe_identifier("CITEL_CLIENT_TABLE", "CADCLI")
+  sales_client_column = get_safe_identifier("CITEL_SALES_CLIENT_COLUMN", "CPG_CODCLI")
+  client_code_column = get_safe_identifier("CITEL_CLIENT_CODE_COLUMN", "CLI_CODCLI")
+  cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
+  amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "CPG_VALDOC")
 
   return text(
     f"""
@@ -162,6 +165,8 @@ def build_sales_query():
       {cpf_column} AS cpf,
       SUM({amount_column}) AS total_faturamento
     FROM {sales_table}
+    INNER JOIN {client_table}
+      ON {sales_table}.{sales_client_column} = {client_table}.{client_code_column}
     WHERE {cpf_column} IS NOT NULL
     GROUP BY {cpf_column}
     """

@@ -21,11 +21,17 @@ services:
       - key: SYNK_TOKEN
         sync: false
       - key: CITEL_SALES_TABLE
-        value: FATGOR
+        value: CPPGER
+      - key: CITEL_CLIENT_TABLE
+        value: CADCLI
+      - key: CITEL_SALES_CLIENT_COLUMN
+        value: CPG_CODCLI
+      - key: CITEL_CLIENT_CODE_COLUMN
+        value: CLI_CODCLI
       - key: CITEL_CPF_COLUMN
-        value: CPF
+        value: CLI_C_G_C_
       - key: CITEL_AMOUNT_COLUMN
-        value: TOTAL_FATURAMENTO
+        value: CPG_VALDOC
 
   - type: web
     name: projeto-qrcode
