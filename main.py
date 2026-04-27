@@ -11,6 +11,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
+APP_VERSION = "2026-04-27.4"
 
 
 def get_required_env(name: str) -> str:
@@ -81,6 +82,14 @@ def get_citel_engine():
     f"mssql+pymssql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}",
     pool_pre_ping=True,
   )
+
+
+def get_database_backend_name() -> str:
+  if os.environ.get("MYSQL_HOST"):
+    return "mysql"
+  if os.environ.get("DB_HOST"):
+    return "sqlserver"
+  return "unconfigured"
 
 
 def validate_sync_token(
@@ -173,7 +182,13 @@ def row_to_coupon_record(row: RowMapping) -> dict[str, Any] | None:
 
 @app.get("/health")
 def health():
-  return {"status": "ok"}
+  return {
+    "status": "ok",
+    "version": APP_VERSION,
+    "database_backend": get_database_backend_name(),
+    "has_mysql_host": bool(os.environ.get("MYSQL_HOST")),
+    "has_db_host": bool(os.environ.get("DB_HOST")),
+  }
 
 
 @app.get("/")
@@ -181,6 +196,8 @@ def root():
   return {
     "status": "online",
     "service": "api-citel-rezende",
+    "version": APP_VERSION,
+    "database_backend": get_database_backend_name(),
     "health": "/health",
     "sync": "/sync?token=VALOR_REAL_DO_SYNK_TOKEN",
     "message": "Troque VALOR_REAL_DO_SYNK_TOKEN pelo valor cadastrado no Render.",
