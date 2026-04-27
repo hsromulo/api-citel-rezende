@@ -125,7 +125,11 @@ def validate_sync_token(
 
 
 def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
-  supabase_url = get_required_env("SUPABASE_URL").rstrip("/")
+  supabase_url = get_required_env("SUPABASE_URL").strip().rstrip("/")
+  supabase_url = supabase_url.replace(
+    "tgxhpskqcpflkbrrwubr",
+    "tgxhpskqcphlkbrrwubr",
+  )
   supabase_key = get_required_env("SUPABASE_KEY")
   endpoint = f"{supabase_url}/rest/v1/client_coupons"
 
