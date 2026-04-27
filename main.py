@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Any
 from urllib.parse import quote_plus
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Query
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import RowMapping
 from supabase import Client, create_client
@@ -66,6 +66,24 @@ def get_supabase_client() -> Client:
   return create_client(supabase_url, supabase_key)
 
 
+def validate_sync_token(
+  token: str | None = Query(default=None),
+  x_sync_token: str | None = Header(default=None),
+) -> None:
+  expected_token = os.environ.get("SYNK_TOKEN") or os.environ.get("SYNC_TOKEN")
+
+  if not expected_token:
+    raise HTTPException(
+      status_code=500,
+      detail="Variavel de ambiente obrigatoria ausente: SYNK_TOKEN",
+    )
+
+  provided_token = x_sync_token or token
+
+  if provided_token != expected_token:
+    raise HTTPException(status_code=401, detail="Token de sincronizacao invalido.")
+
+
 def build_sales_query():
   sales_table = get_safe_identifier("CITEL_SALES_TABLE", "FATGOR")
   cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CPF")
@@ -103,7 +121,12 @@ def health():
 
 
 @app.get("/sync")
-def sync_client_coupons():
+def sync_client_coupons(
+  token: str | None = Query(default=None),
+  x_sync_token: str | None = Header(default=None),
+):
+  validate_sync_token(token=token, x_sync_token=x_sync_token)
+
   engine = get_citel_engine()
   supabase = get_supabase_client()
 

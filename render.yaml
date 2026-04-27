@@ -20,6 +20,8 @@ services:
         sync: false
       - key: SUPABASE_KEY
         sync: false
+      - key: SYNK_TOKEN
+        sync: false
       - key: CITEL_SALES_TABLE
         value: FATGOR
       - key: CITEL_CPF_COLUMN
