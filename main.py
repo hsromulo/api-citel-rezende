@@ -23,6 +23,18 @@ def get_required_env(name: str) -> str:
   return value
 
 
+def get_required_env_any(*names: str) -> str:
+  for name in names:
+    value = os.environ.get(name)
+    if value:
+      return value
+
+  raise HTTPException(
+    status_code=500,
+    detail=f"Variavel de ambiente obrigatoria ausente: {' ou '.join(names)}",
+  )
+
+
 def get_safe_identifier(env_name: str, default: str) -> str:
   value = os.environ.get(env_name, default)
   if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", value):
@@ -44,11 +56,11 @@ def to_float(value: Any) -> float:
 
 
 def get_citel_engine():
-  db_user = quote_plus(get_required_env("DB_USER"))
-  db_pass = quote_plus(get_required_env("DB_PASS"))
-  db_host = get_required_env("DB_HOST")
-  db_port = os.environ.get("DB_PORT", "1433")
-  db_name = quote_plus(get_required_env("DB_NAME"))
+  db_user = quote_plus(get_required_env_any("DB_USER", "MYSQL_USER"))
+  db_pass = quote_plus(get_required_env_any("DB_PASS", "MYSQL_PASS"))
+  db_host = get_required_env_any("DB_HOST", "MYSQL_HOST")
+  db_port = os.environ.get("DB_PORT") or os.environ.get("MYSQL_PORT") or "1433"
+  db_name = quote_plus(get_required_env_any("DB_NAME", "MYSQL_DB"))
 
   return create_engine(
     f"mssql+pymssql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}",
