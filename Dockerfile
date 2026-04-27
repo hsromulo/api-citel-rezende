@@ -10,6 +10,8 @@ RUN apt-get update \
     apt-transport-https \
     ca-certificates \
     curl \
+    freetds-dev \
+    freetds-bin \
     gnupg \
     unixodbc-dev \
   && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
