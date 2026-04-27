@@ -2,6 +2,7 @@ import os
 import re
 from decimal import Decimal
 from typing import Any
+from urllib.parse import quote_plus
 
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import create_engine, text
@@ -43,8 +44,18 @@ def to_float(value: Any) -> float:
 
 
 def get_citel_engine():
-  citel_url = get_required_env("CITEL_URL")
-  return create_engine(citel_url, pool_pre_ping=True)
+  mysql_user = quote_plus(get_required_env("MYSQL_USER"))
+  mysql_pass = quote_plus(get_required_env("MYSQL_PASS"))
+  mysql_host = get_required_env("MYSQL_HOST")
+  mysql_port = os.environ.get("MYSQL_PORT", "3306")
+  mysql_db = get_required_env("MYSQL_DB")
+
+  mysql_url = (
+    f"mysql+pymysql://{mysql_user}:{mysql_pass}"
+    f"@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
+  )
+
+  return create_engine(mysql_url, pool_pre_ping=True)
 
 
 def get_supabase_client() -> Client:
@@ -100,7 +111,7 @@ def sync_client_coupons():
   except Exception as exc:
     raise HTTPException(
       status_code=502,
-      detail=f"Erro ao consultar SQL Server da Citel: {exc}",
+      detail=f"Erro ao consultar MySQL da Citel: {exc}",
     ) from exc
 
   records = [

@@ -5,7 +5,15 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: CITEL_URL
+      - key: MYSQL_DB
+        sync: false
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_PASS
+        sync: false
+      - key: MYSQL_PORT
+        sync: false
+      - key: MYSQL_USER
         sync: false
       - key: SUPABASE_URL
         sync: false
