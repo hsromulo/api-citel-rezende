@@ -14,10 +14,6 @@ services:
         sync: false
       - key: DB_NAME
         sync: false
-      - key: DB_BACKEND
-        value: pymssql
-      - key: DB_DRIVER
-        value: ODBC Driver 17 for SQL Server
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
