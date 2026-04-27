@@ -44,20 +44,28 @@ def to_float(value: Any) -> float:
 
 
 def get_citel_engine():
-  db_user = quote_plus(get_required_env("DB_USER"))
-  db_pass = quote_plus(get_required_env("DB_PASS"))
+  db_user = get_required_env("DB_USER")
+  db_pass = get_required_env("DB_PASS")
   db_host = get_required_env("DB_HOST")
   db_port = os.environ.get("DB_PORT", "1433")
   db_name = get_required_env("DB_NAME")
-  db_driver = quote_plus(os.environ.get("DB_DRIVER", "ODBC Driver 17 for SQL Server"))
+  db_driver = os.environ.get("DB_DRIVER", "ODBC Driver 17 for SQL Server")
 
-  sql_server_url = (
-    f"mssql+pyodbc://{db_user}:{db_pass}"
-    f"@{db_host}:{db_port}/{db_name}"
-    f"?driver={db_driver}&TrustServerCertificate=yes"
+  odbc_connection = (
+    f"DRIVER={{{db_driver}}};"
+    f"SERVER={db_host},{db_port};"
+    f"DATABASE={db_name};"
+    f"UID={db_user};"
+    f"PWD={db_pass};"
+    "Encrypt=no;"
+    "TrustServerCertificate=yes;"
+    "Connection Timeout=30;"
   )
 
-  return create_engine(sql_server_url, pool_pre_ping=True)
+  return create_engine(
+    f"mssql+pyodbc:///?odbc_connect={quote_plus(odbc_connection)}",
+    pool_pre_ping=True,
+  )
 
 
 def validate_sync_token(
