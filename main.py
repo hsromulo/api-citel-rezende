@@ -56,11 +56,26 @@ def to_float(value: Any) -> float:
 
 
 def get_citel_engine():
-  db_user = quote_plus(get_required_env_any("DB_USER", "MYSQL_USER"))
-  db_pass = quote_plus(get_required_env_any("DB_PASS", "MYSQL_PASS"))
-  db_host = get_required_env_any("DB_HOST", "MYSQL_HOST")
-  db_port = os.environ.get("DB_PORT") or os.environ.get("MYSQL_PORT") or "1433"
-  db_name = quote_plus(get_required_env_any("DB_NAME", "MYSQL_DB"))
+  if os.environ.get("MYSQL_HOST"):
+    mysql_user = quote_plus(get_required_env("MYSQL_USER"))
+    mysql_pass = quote_plus(get_required_env("MYSQL_PASS"))
+    mysql_host = get_required_env("MYSQL_HOST")
+    mysql_port = os.environ.get("MYSQL_PORT", "3306")
+    mysql_db = quote_plus(get_required_env("MYSQL_DB"))
+
+    return create_engine(
+      (
+        f"mysql+pymysql://{mysql_user}:{mysql_pass}"
+        f"@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
+      ),
+      pool_pre_ping=True,
+    )
+
+  db_user = quote_plus(get_required_env("DB_USER"))
+  db_pass = quote_plus(get_required_env("DB_PASS"))
+  db_host = get_required_env("DB_HOST")
+  db_port = os.environ.get("DB_PORT", "1433")
+  db_name = quote_plus(get_required_env("DB_NAME"))
 
   return create_engine(
     f"mssql+pymssql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}",
