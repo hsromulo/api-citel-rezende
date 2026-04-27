@@ -168,6 +168,28 @@ def build_sales_query():
   )
 
 
+def build_columns_query(table_name: str):
+  if get_database_backend_name() == "mysql":
+    return text(
+      """
+      SELECT COLUMN_NAME AS column_name
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = :table_name
+      ORDER BY ORDINAL_POSITION
+      """
+    )
+
+  return text(
+    """
+    SELECT COLUMN_NAME AS column_name
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = :table_name
+    ORDER BY ORDINAL_POSITION
+    """
+  )
+
+
 def row_to_coupon_record(row: RowMapping) -> dict[str, Any] | None:
   cpf = normalize_cpf(row["cpf"])
   total_faturamento = to_float(row["total_faturamento"])
@@ -253,4 +275,35 @@ def sync_client_coupons(
     "success": True,
     "processed": len(rows),
     "upserted": len(records),
+  }
+
+
+@app.get("/columns")
+def list_table_columns(
+  table: str = Query(default="FATGOR"),
+  token: str | None = Query(default=None),
+  x_sync_token: str | None = Header(default=None),
+):
+  validate_sync_token(token=token, x_sync_token=x_sync_token)
+
+  if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", table):
+    raise HTTPException(status_code=400, detail="Nome de tabela invalido.")
+
+  engine = get_citel_engine()
+
+  try:
+    with engine.connect() as connection:
+      rows = connection.execute(
+        build_columns_query(table),
+        {"table_name": table},
+      ).mappings().all()
+  except Exception as exc:
+    raise HTTPException(
+      status_code=502,
+      detail=f"Erro ao consultar colunas da tabela {table}: {exc}",
+    ) from exc
+
+  return {
+    "table": table,
+    "columns": [row["column_name"] for row in rows],
   }
