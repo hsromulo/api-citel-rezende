@@ -4,10 +4,10 @@ from decimal import Decimal
 from typing import Any
 from urllib.parse import quote_plus
 
+import httpx
 from fastapi import FastAPI, Header, HTTPException, Query
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import RowMapping
-from supabase import Client, create_client
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
@@ -60,12 +60,6 @@ def get_citel_engine():
   return create_engine(sql_server_url, pool_pre_ping=True)
 
 
-def get_supabase_client() -> Client:
-  supabase_url = get_required_env("SUPABASE_URL")
-  supabase_key = get_required_env("SUPABASE_KEY")
-  return create_client(supabase_url, supabase_key)
-
-
 def validate_sync_token(
   token: str | None = Query(default=None),
   x_sync_token: str | None = Header(default=None),
@@ -82,6 +76,33 @@ def validate_sync_token(
 
   if provided_token != expected_token:
     raise HTTPException(status_code=401, detail="Token de sincronizacao invalido.")
+
+
+def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
+  supabase_url = get_required_env("SUPABASE_URL").rstrip("/")
+  supabase_key = get_required_env("SUPABASE_KEY")
+  endpoint = f"{supabase_url}/rest/v1/client_coupons"
+
+  headers = {
+    "apikey": supabase_key,
+    "Authorization": f"Bearer {supabase_key}",
+    "Content-Type": "application/json",
+    "Prefer": "resolution=merge-duplicates,return=minimal",
+  }
+
+  response = httpx.post(
+    endpoint,
+    params={"on_conflict": "cpf"},
+    headers=headers,
+    json=records,
+    timeout=60,
+  )
+
+  if response.status_code >= 400:
+    raise HTTPException(
+      status_code=502,
+      detail=f"Erro ao gravar dados no Supabase: {response.text}",
+    )
 
 
 def build_sales_query():
@@ -128,7 +149,6 @@ def sync_client_coupons(
   validate_sync_token(token=token, x_sync_token=x_sync_token)
 
   engine = get_citel_engine()
-  supabase = get_supabase_client()
 
   try:
     with engine.connect() as connection:
@@ -154,11 +174,11 @@ def sync_client_coupons(
     }
 
   try:
-    supabase.table("client_coupons").upsert(
-      records,
-      on_conflict="cpf",
-    ).execute()
+    upsert_client_coupons(records)
   except Exception as exc:
+    if isinstance(exc, HTTPException):
+      raise
+
     raise HTTPException(
       status_code=502,
       detail=f"Erro ao gravar dados no Supabase: {exc}",
