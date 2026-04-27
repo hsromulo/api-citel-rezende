@@ -74,8 +74,20 @@ def validate_sync_token(
 
   provided_token = x_sync_token or token
 
+  if provided_token in {None, "", "SEU_SYNК_TOKEN", "SEU_SYNK_TOKEN"}:
+    raise HTTPException(
+      status_code=401,
+      detail=(
+        "Informe o valor real da variavel SYNK_TOKEN. "
+        "Nao use o texto SEU_SYNK_TOKEN na URL."
+      ),
+    )
+
   if provided_token != expected_token:
-    raise HTTPException(status_code=401, detail="Token de sincronizacao invalido.")
+    raise HTTPException(
+      status_code=401,
+      detail="Token de sincronizacao invalido. Confira o valor em SYNK_TOKEN no Render.",
+    )
 
 
 def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
@@ -139,6 +151,17 @@ def row_to_coupon_record(row: RowMapping) -> dict[str, Any] | None:
 @app.get("/health")
 def health():
   return {"status": "ok"}
+
+
+@app.get("/")
+def root():
+  return {
+    "status": "online",
+    "service": "api-citel-rezende",
+    "health": "/health",
+    "sync": "/sync?token=VALOR_REAL_DO_SYNK_TOKEN",
+    "message": "Troque VALOR_REAL_DO_SYNK_TOKEN pelo valor cadastrado no Render.",
+  }
 
 
 @app.get("/sync")
