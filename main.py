@@ -57,12 +57,14 @@ def to_float(value: Any) -> float:
 
 
 def get_citel_engine():
-  if os.environ.get("MYSQL_HOST"):
-    mysql_user = quote_plus(get_required_env("MYSQL_USER"))
-    mysql_pass = quote_plus(get_required_env("MYSQL_PASS"))
-    mysql_host = get_required_env("MYSQL_HOST")
-    mysql_port = os.environ.get("MYSQL_PORT", "3306")
-    mysql_db = quote_plus(get_required_env("MYSQL_DB"))
+  db_backend = os.environ.get("DB_BACKEND", "mysql").lower()
+
+  if db_backend != "sqlserver":
+    mysql_user = quote_plus(get_required_env_any("MYSQL_USER", "DB_USER"))
+    mysql_pass = quote_plus(get_required_env_any("MYSQL_PASS", "DB_PASS"))
+    mysql_host = get_required_env_any("MYSQL_HOST", "DB_HOST")
+    mysql_port = os.environ.get("MYSQL_PORT") or os.environ.get("DB_PORT") or "3306"
+    mysql_db = quote_plus(get_required_env_any("MYSQL_DB", "DB_NAME"))
 
     return create_engine(
       (
@@ -85,7 +87,7 @@ def get_citel_engine():
 
 
 def get_database_backend_name() -> str:
-  if os.environ.get("MYSQL_HOST"):
+  if os.environ.get("DB_BACKEND", "mysql").lower() != "sqlserver":
     return "mysql"
   if os.environ.get("DB_HOST"):
     return "sqlserver"
