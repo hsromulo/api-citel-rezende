@@ -49,7 +49,7 @@ def get_citel_engine():
   db_host = get_required_env("DB_HOST")
   db_port = os.environ.get("DB_PORT", "1433")
   db_name = get_required_env("DB_NAME")
-  db_driver = quote_plus(os.environ.get("DB_DRIVER", "ODBC Driver 18 for SQL Server"))
+  db_driver = quote_plus(os.environ.get("DB_DRIVER", "ODBC Driver 17 for SQL Server"))
 
   sql_server_url = (
     f"mssql+pyodbc://{db_user}:{db_pass}"
