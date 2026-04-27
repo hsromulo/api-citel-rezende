@@ -5,16 +5,18 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: MYSQL_DB
+      - key: DB_HOST
         sync: false
-      - key: MYSQL_HOST
+      - key: DB_PORT
         sync: false
-      - key: MYSQL_PASS
+      - key: DB_USER
         sync: false
-      - key: MYSQL_PORT
+      - key: DB_PASS
         sync: false
-      - key: MYSQL_USER
+      - key: DB_NAME
         sync: false
+      - key: DB_DRIVER
+        value: ODBC Driver 18 for SQL Server
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY

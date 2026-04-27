@@ -44,18 +44,20 @@ def to_float(value: Any) -> float:
 
 
 def get_citel_engine():
-  mysql_user = quote_plus(get_required_env("MYSQL_USER"))
-  mysql_pass = quote_plus(get_required_env("MYSQL_PASS"))
-  mysql_host = get_required_env("MYSQL_HOST")
-  mysql_port = os.environ.get("MYSQL_PORT", "3306")
-  mysql_db = get_required_env("MYSQL_DB")
+  db_user = quote_plus(get_required_env("DB_USER"))
+  db_pass = quote_plus(get_required_env("DB_PASS"))
+  db_host = get_required_env("DB_HOST")
+  db_port = os.environ.get("DB_PORT", "1433")
+  db_name = get_required_env("DB_NAME")
+  db_driver = quote_plus(os.environ.get("DB_DRIVER", "ODBC Driver 18 for SQL Server"))
 
-  mysql_url = (
-    f"mysql+pymysql://{mysql_user}:{mysql_pass}"
-    f"@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
+  sql_server_url = (
+    f"mssql+pyodbc://{db_user}:{db_pass}"
+    f"@{db_host}:{db_port}/{db_name}"
+    f"?driver={db_driver}&TrustServerCertificate=yes"
   )
 
-  return create_engine(mysql_url, pool_pre_ping=True)
+  return create_engine(sql_server_url, pool_pre_ping=True)
 
 
 def get_supabase_client() -> Client:
@@ -111,7 +113,7 @@ def sync_client_coupons():
   except Exception as exc:
     raise HTTPException(
       status_code=502,
-      detail=f"Erro ao consultar MySQL da Citel: {exc}",
+      detail=f"Erro ao consultar SQL Server da Citel: {exc}",
     ) from exc
 
   records = [
