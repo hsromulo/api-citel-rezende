@@ -212,7 +212,7 @@ def build_detailed_coupon_query():
   cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
   amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "CPG_VALDOC")
   customer_name_column = get_safe_identifier("CITEL_CUSTOMER_NAME_COLUMN", "CLI_NOMCLI")
-  seller_column = get_safe_identifier("CITEL_SELLER_COLUMN", "CLI_CODVEN")
+  movement_seller_column = get_safe_identifier("CITEL_MOVEMENT_SELLER_COLUMN", "GER_CODVEN")
   phone_column = get_safe_identifier("CITEL_PHONE_COLUMN", "CLI_FONE01")
   mobile_column = get_safe_identifier("CITEL_MOBILE_COLUMN", "CLI_CELULA")
   address_column = get_safe_identifier("CITEL_ADDRESS_COLUMN", "CLI_ENDERE")
@@ -231,7 +231,7 @@ def build_detailed_coupon_query():
       clients.{cpf_column} AS cpf,
       sales.{sales_client_column} AS customer_code,
       sales.{amount_column} AS document_amount,
-      clients.{seller_column} AS seller_code,
+      movements.{movement_seller_column} AS seller_code,
       sellers.{seller_name_column} AS seller_name,
       clients.{customer_name_column} AS customer_name,
       clients.{phone_column} AS customer_phone,
@@ -242,13 +242,13 @@ def build_detailed_coupon_query():
     FROM {sales_table} AS sales
     INNER JOIN {client_table} AS clients
       ON sales.{sales_client_column} = clients.{client_code_column}
-    LEFT JOIN {seller_table} AS sellers
-      ON clients.{seller_column} = sellers.{seller_code_column}
     INNER JOIN {movement_table} AS movements
       ON movements.{movement_document_column} = sales.{sales_document_column}
       AND movements.{movement_document_type_column} = sales.{sales_document_type_column}
       AND movements.{movement_company_column} = sales.{sales_company_column}
       AND movements.{movement_client_column} = sales.{sales_client_column}
+    LEFT JOIN {seller_table} AS sellers
+      ON movements.{movement_seller_column} = sellers.{seller_code_column}
     WHERE clients.{cpf_column} IS NOT NULL
       AND TRIM(CAST(movements.{movement_increment_column} AS CHAR)) <> ''
     """
