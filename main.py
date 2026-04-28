@@ -11,7 +11,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-28.4"
+APP_VERSION = "2026-04-28.5"
 
 
 def get_required_env(name: str) -> str:
@@ -400,6 +400,36 @@ def row_to_coupon_record(row: RowMapping) -> dict[str, Any] | None:
   }
 
 
+def merge_client_coupon_records(
+  records: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+  records_by_cpf: dict[str, dict[str, Any]] = {}
+
+  for record in records:
+    cpf = record["cpf"]
+
+    if cpf not in records_by_cpf:
+      records_by_cpf[cpf] = dict(record)
+      continue
+
+    current = records_by_cpf[cpf]
+    current["total_faturamento"] = round(
+      to_float(current.get("total_faturamento")) +
+      to_float(record.get("total_faturamento")),
+      2,
+    )
+    current["cupons_disponiveis"] = int(
+      current.get("cupons_disponiveis") or 0
+    ) + int(record.get("cupons_disponiveis") or 0)
+
+    if not current.get("customer_code") and record.get("customer_code"):
+      current["customer_code"] = record["customer_code"]
+    if not current.get("customer_name") and record.get("customer_name"):
+      current["customer_name"] = record["customer_name"]
+
+  return list(records_by_cpf.values())
+
+
 @app.get("/health")
 def health():
   return {
@@ -453,6 +483,7 @@ def sync_client_coupons(
     for row in summary_rows
     if (record := row_to_coupon_record(row)) is not None
   ]
+  summary_records = merge_client_coupon_records(summary_records)
 
   if not coupon_records and not summary_records:
     return {
