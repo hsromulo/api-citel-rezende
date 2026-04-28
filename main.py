@@ -11,7 +11,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-28.5"
+APP_VERSION = "2026-04-28.6"
 
 
 def get_required_env(name: str) -> str:
@@ -183,12 +183,43 @@ def post_supabase_records(
     )
 
 
+def delete_supabase_records(
+  table_name: str,
+  filter_query: str,
+) -> None:
+  supabase_url, supabase_key = get_supabase_config()
+  endpoint = f"{supabase_url}/rest/v1/{table_name}?{filter_query}"
+
+  headers = {
+    "apikey": supabase_key,
+    "Authorization": f"Bearer {supabase_key}",
+    "Prefer": "return=minimal",
+  }
+
+  response = httpx.delete(
+    endpoint,
+    headers=headers,
+    timeout=60,
+  )
+
+  if response.status_code >= 400:
+    raise HTTPException(
+      status_code=502,
+      detail=f"Erro ao limpar dados no Supabase ({table_name}): {response.text}",
+    )
+
+
 def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
   post_supabase_records("client_coupons", records, "cpf")
 
 
 def upsert_coupons(records: list[dict[str, Any]]) -> None:
   post_supabase_records("coupons", records, "code")
+
+
+def clear_synced_supabase_data() -> None:
+  delete_supabase_records("coupons", "id=not.is.null")
+  delete_supabase_records("client_coupons", "cpf=not.is.null")
 
 
 def build_detailed_coupon_query():
@@ -495,6 +526,7 @@ def sync_client_coupons(
     }
 
   try:
+    clear_synced_supabase_data()
     upsert_coupons(coupon_records)
     upsert_client_coupons(summary_records)
   except Exception as exc:
