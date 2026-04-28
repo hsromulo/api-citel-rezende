@@ -6,12 +6,13 @@ from urllib.parse import quote_plus
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-28.6"
+APP_VERSION = "2026-04-28.7"
 
 
 def get_required_env(name: str) -> str:
@@ -470,6 +471,11 @@ def health():
     "has_mysql_host": bool(os.environ.get("MYSQL_HOST")),
     "has_db_host": bool(os.environ.get("DB_HOST")),
   }
+
+
+@app.get("/ping", response_class=PlainTextResponse)
+def ping():
+  return "ok"
 
 
 @app.get("/")
