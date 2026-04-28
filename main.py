@@ -11,7 +11,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-28.2"
+APP_VERSION = "2026-04-28.3"
 
 
 def get_required_env(name: str) -> str:
@@ -194,10 +194,17 @@ def upsert_coupons(records: list[dict[str, Any]]) -> None:
 def build_detailed_coupon_query():
   sales_table = get_safe_table_identifier("CITEL_SALES_TABLE", "CPPGER")
   client_table = get_safe_table_identifier("CITEL_CLIENT_TABLE", "CADCLI")
+  movement_table = get_safe_table_identifier("CITEL_MOVEMENT_TABLE", "MOVGER")
+  movement_increment_column = get_safe_identifier("CITEL_MOVEMENT_INCREMENT_COLUMN", "AUTOINCREM")
+  movement_document_column = get_safe_identifier("CITEL_MOVEMENT_DOCUMENT_COLUMN", "GER_NUMDOC")
+  movement_document_type_column = get_safe_identifier("CITEL_MOVEMENT_DOCUMENT_TYPE_COLUMN", "GER_ESPDOC")
+  movement_company_column = get_safe_identifier("CITEL_MOVEMENT_COMPANY_COLUMN", "GER_CODEMP")
+  movement_client_column = get_safe_identifier("CITEL_MOVEMENT_CLIENT_COLUMN", "GER_CODCLI")
   sales_sequence_column = get_safe_identifier("CITEL_SALES_SEQUENCE_COLUMN", "CPG_SEQUEN")
   sales_document_column = get_safe_identifier("CITEL_SALES_DOCUMENT_COLUMN", "CPG_NUMDOC")
   sales_document_type_column = get_safe_identifier("CITEL_SALES_DOCUMENT_TYPE_COLUMN", "CPG_ESPDOC")
   sales_client_column = get_safe_identifier("CITEL_SALES_CLIENT_COLUMN", "CPG_CODCLI")
+  sales_company_column = get_safe_identifier("CITEL_SALES_COMPANY_COLUMN", "CPG_CODEMP")
   client_code_column = get_safe_identifier("CITEL_CLIENT_CODE_COLUMN", "CLI_CODCLI")
   cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
   amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "CPG_VALDOC")
@@ -208,7 +215,6 @@ def build_detailed_coupon_query():
   address_column = get_safe_identifier("CITEL_ADDRESS_COLUMN", "CLI_ENDERE")
   neighborhood_column = get_safe_identifier("CITEL_NEIGHBORHOOD_COLUMN", "CLI_BAIRRO")
   zipcode_column = get_safe_identifier("CITEL_ZIPCODE_COLUMN", "CLI_C_E_P_")
-
   return text(
     f"""
     SELECT
@@ -228,7 +234,13 @@ def build_detailed_coupon_query():
     FROM {sales_table} AS sales
     INNER JOIN {client_table} AS clients
       ON sales.{sales_client_column} = clients.{client_code_column}
+    INNER JOIN {movement_table} AS movements
+      ON movements.{movement_document_column} = sales.{sales_document_column}
+      AND movements.{movement_document_type_column} = sales.{sales_document_type_column}
+      AND movements.{movement_company_column} = sales.{sales_company_column}
+      AND movements.{movement_client_column} = sales.{sales_client_column}
     WHERE clients.{cpf_column} IS NOT NULL
+      AND TRIM(CAST(movements.{movement_increment_column} AS CHAR)) <> ''
     """
   )
 
@@ -274,7 +286,16 @@ def row_to_detailed_coupon_record(row: RowMapping) -> dict[str, Any] | None:
 def build_sales_query():
   sales_table = get_safe_table_identifier("CITEL_SALES_TABLE", "CPPGER")
   client_table = get_safe_table_identifier("CITEL_CLIENT_TABLE", "CADCLI")
+  movement_table = get_safe_table_identifier("CITEL_MOVEMENT_TABLE", "MOVGER")
+  movement_increment_column = get_safe_identifier("CITEL_MOVEMENT_INCREMENT_COLUMN", "AUTOINCREM")
+  movement_document_column = get_safe_identifier("CITEL_MOVEMENT_DOCUMENT_COLUMN", "GER_NUMDOC")
+  movement_document_type_column = get_safe_identifier("CITEL_MOVEMENT_DOCUMENT_TYPE_COLUMN", "GER_ESPDOC")
+  movement_company_column = get_safe_identifier("CITEL_MOVEMENT_COMPANY_COLUMN", "GER_CODEMP")
+  movement_client_column = get_safe_identifier("CITEL_MOVEMENT_CLIENT_COLUMN", "GER_CODCLI")
   sales_client_column = get_safe_identifier("CITEL_SALES_CLIENT_COLUMN", "CPG_CODCLI")
+  sales_document_column = get_safe_identifier("CITEL_SALES_DOCUMENT_COLUMN", "CPG_NUMDOC")
+  sales_document_type_column = get_safe_identifier("CITEL_SALES_DOCUMENT_TYPE_COLUMN", "CPG_ESPDOC")
+  sales_company_column = get_safe_identifier("CITEL_SALES_COMPANY_COLUMN", "CPG_CODEMP")
   client_code_column = get_safe_identifier("CITEL_CLIENT_CODE_COLUMN", "CLI_CODCLI")
   cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
   amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "CPG_VALDOC")
@@ -287,7 +308,13 @@ def build_sales_query():
     FROM {sales_table} AS sales
     INNER JOIN {client_table} AS clients
       ON sales.{sales_client_column} = clients.{client_code_column}
+    INNER JOIN {movement_table} AS movements
+      ON movements.{movement_document_column} = sales.{sales_document_column}
+      AND movements.{movement_document_type_column} = sales.{sales_document_type_column}
+      AND movements.{movement_company_column} = sales.{sales_company_column}
+      AND movements.{movement_client_column} = sales.{sales_client_column}
     WHERE clients.{cpf_column} IS NOT NULL
+      AND TRIM(CAST(movements.{movement_increment_column} AS CHAR)) <> ''
     GROUP BY clients.{cpf_column}
     """
   )
