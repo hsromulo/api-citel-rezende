@@ -11,7 +11,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-27.4"
+APP_VERSION = "2026-04-28.1"
 
 
 def get_required_env(name: str) -> str:
@@ -39,6 +39,16 @@ def get_required_env_any(*names: str) -> str:
 def get_safe_identifier(env_name: str, default: str) -> str:
   value = os.environ.get(env_name, default)
   if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", value):
+    raise HTTPException(
+      status_code=500,
+      detail=f"Identificador SQL invalido em {env_name}: {value}",
+    )
+  return value
+
+
+def get_safe_table_identifier(env_name: str, default: str) -> str:
+  value = os.environ.get(env_name, default)
+  if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?", value):
     raise HTTPException(
       status_code=500,
       detail=f"Identificador SQL invalido em {env_name}: {value}",
@@ -124,7 +134,7 @@ def validate_sync_token(
     )
 
 
-def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
+def get_supabase_config() -> tuple[str, str]:
   supabase_url = get_required_env("SUPABASE_URL").strip().rstrip("/")
   supabase_url = supabase_url.replace(
     "tgxhpskqcpflkbrrwubr",
@@ -136,7 +146,20 @@ def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
     or os.environ.get("$UPABASE_SERVICE_KEY")
     or get_required_env("SUPABASE_KEY")
   )
-  endpoint = f"{supabase_url}/rest/v1/client_coupons"
+
+  return supabase_url, supabase_key
+
+
+def post_supabase_records(
+  table_name: str,
+  records: list[dict[str, Any]],
+  conflict_column: str,
+) -> None:
+  if not records:
+    return
+
+  supabase_url, supabase_key = get_supabase_config()
+  endpoint = f"{supabase_url}/rest/v1/{table_name}"
 
   headers = {
     "apikey": supabase_key,
@@ -147,7 +170,7 @@ def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
 
   response = httpx.post(
     endpoint,
-    params={"on_conflict": "cpf"},
+    params={"on_conflict": conflict_column},
     headers=headers,
     json=records,
     timeout=60,
@@ -156,13 +179,70 @@ def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
   if response.status_code >= 400:
     raise HTTPException(
       status_code=502,
-      detail=f"Erro ao gravar dados no Supabase: {response.text}",
+      detail=f"Erro ao gravar dados no Supabase ({table_name}): {response.text}",
     )
 
 
+def upsert_client_coupons(records: list[dict[str, Any]]) -> None:
+  post_supabase_records("client_coupons", records, "cpf")
+
+
+def upsert_coupons(records: list[dict[str, Any]]) -> None:
+  post_supabase_records("coupons", records, "code")
+
+
+def build_detailed_coupon_query():
+  sales_table = get_safe_table_identifier("CITEL_SALES_TABLE", "CPPGER")
+  client_table = get_safe_table_identifier("CITEL_CLIENT_TABLE", "CADCLI")
+  sales_sequence_column = get_safe_identifier("CITEL_SALES_SEQUENCE_COLUMN", "CPG_SEQUEN")
+  sales_document_column = get_safe_identifier("CITEL_SALES_DOCUMENT_COLUMN", "CPG_NUMDOC")
+  sales_document_type_column = get_safe_identifier("CITEL_SALES_DOCUMENT_TYPE_COLUMN", "CPG_ESPDOC")
+  sales_client_column = get_safe_identifier("CITEL_SALES_CLIENT_COLUMN", "CPG_CODCLI")
+  client_code_column = get_safe_identifier("CITEL_CLIENT_CODE_COLUMN", "CLI_CODCLI")
+  cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
+  amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "CPG_VALDOC")
+  customer_name_column = get_safe_identifier("CITEL_CUSTOMER_NAME_COLUMN", "CLI_NOMCLI")
+
+  return text(
+    f"""
+    SELECT
+      sales.{sales_sequence_column} AS coupon_code,
+      sales.{sales_document_column} AS document_number,
+      sales.{sales_document_type_column} AS document_type,
+      clients.{cpf_column} AS cpf,
+      sales.{sales_client_column} AS customer_code,
+      sales.{amount_column} AS document_amount,
+      clients.{customer_name_column} AS customer_name
+    FROM {sales_table} AS sales
+    INNER JOIN {client_table} AS clients
+      ON sales.{sales_client_column} = clients.{client_code_column}
+    WHERE clients.{cpf_column} IS NOT NULL
+    """
+  )
+
+
+def row_to_detailed_coupon_record(row: RowMapping) -> dict[str, Any] | None:
+  cpf = normalize_cpf(row["cpf"])
+  coupon_code = str(row["coupon_code"] or "").strip()
+  document_number = str(row["document_number"] or "").strip()
+  document_type = str(row["document_type"] or "").strip()
+
+  if len(cpf) != 11 or not coupon_code or not document_number:
+    return None
+
+  return {
+    "code": coupon_code,
+    "cpf": cpf,
+    "document_number": document_number,
+    "discount_percentage": 0,
+    "category": document_type or "AUTCOM",
+    "expiry_date": "2026-12-31",
+  }
+
+
 def build_sales_query():
-  sales_table = get_safe_identifier("CITEL_SALES_TABLE", "CPPGER")
-  client_table = get_safe_identifier("CITEL_CLIENT_TABLE", "CADCLI")
+  sales_table = get_safe_table_identifier("CITEL_SALES_TABLE", "CPPGER")
+  client_table = get_safe_table_identifier("CITEL_CLIENT_TABLE", "CADCLI")
   sales_client_column = get_safe_identifier("CITEL_SALES_CLIENT_COLUMN", "CPG_CODCLI")
   client_code_column = get_safe_identifier("CITEL_CLIENT_CODE_COLUMN", "CLI_CODCLI")
   cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
@@ -171,13 +251,13 @@ def build_sales_query():
   return text(
     f"""
     SELECT
-      {cpf_column} AS cpf,
-      SUM({amount_column}) AS total_faturamento
-    FROM {sales_table}
-    INNER JOIN {client_table}
-      ON {sales_table}.{sales_client_column} = {client_table}.{client_code_column}
-    WHERE {cpf_column} IS NOT NULL
-    GROUP BY {cpf_column}
+      clients.{cpf_column} AS cpf,
+      SUM(sales.{amount_column}) AS total_faturamento
+    FROM {sales_table} AS sales
+    INNER JOIN {client_table} AS clients
+      ON sales.{sales_client_column} = clients.{client_code_column}
+    WHERE clients.{cpf_column} IS NOT NULL
+    GROUP BY clients.{cpf_column}
     """
   )
 
@@ -253,29 +333,37 @@ def sync_client_coupons(
 
   try:
     with engine.connect() as connection:
-      rows = connection.execute(build_sales_query()).mappings().all()
+      coupon_rows = connection.execute(build_detailed_coupon_query()).mappings().all()
+      summary_rows = connection.execute(build_sales_query()).mappings().all()
   except Exception as exc:
     raise HTTPException(
       status_code=502,
-      detail=f"Erro ao consultar SQL Server da Citel: {exc}",
+      detail=f"Erro ao consultar banco do Autcom/Citel: {exc}",
     ) from exc
 
-  records = [
+  coupon_records = [
     record
-    for row in rows
+    for row in coupon_rows
+    if (record := row_to_detailed_coupon_record(row)) is not None
+  ]
+  summary_records = [
+    record
+    for row in summary_rows
     if (record := row_to_coupon_record(row)) is not None
   ]
 
-  if not records:
+  if not coupon_records and not summary_records:
     return {
       "success": True,
       "message": "Nenhum CPF valido encontrado para sincronizar.",
       "processed": 0,
-      "upserted": 0,
+      "upserted_coupons": 0,
+      "upserted_clients": 0,
     }
 
   try:
-    upsert_client_coupons(records)
+    upsert_coupons(coupon_records)
+    upsert_client_coupons(summary_records)
   except Exception as exc:
     if isinstance(exc, HTTPException):
       raise
@@ -287,8 +375,10 @@ def sync_client_coupons(
 
   return {
     "success": True,
-    "processed": len(rows),
-    "upserted": len(records),
+    "processed_coupons": len(coupon_rows),
+    "processed_clients": len(summary_rows),
+    "upserted_coupons": len(coupon_records),
+    "upserted_clients": len(summary_records),
   }
 
 
