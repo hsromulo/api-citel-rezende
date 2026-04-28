@@ -11,7 +11,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-28.3"
+APP_VERSION = "2026-04-28.4"
 
 
 def get_required_env(name: str) -> str:
@@ -195,12 +195,15 @@ def build_detailed_coupon_query():
   sales_table = get_safe_table_identifier("CITEL_SALES_TABLE", "CPPGER")
   client_table = get_safe_table_identifier("CITEL_CLIENT_TABLE", "CADCLI")
   movement_table = get_safe_table_identifier("CITEL_MOVEMENT_TABLE", "MOVGER")
+  seller_table = get_safe_table_identifier("CITEL_SELLER_TABLE", "CADOPE")
   movement_increment_column = get_safe_identifier("CITEL_MOVEMENT_INCREMENT_COLUMN", "AUTOINCREM")
   movement_document_column = get_safe_identifier("CITEL_MOVEMENT_DOCUMENT_COLUMN", "GER_NUMDOC")
   movement_document_type_column = get_safe_identifier("CITEL_MOVEMENT_DOCUMENT_TYPE_COLUMN", "GER_ESPDOC")
   movement_company_column = get_safe_identifier("CITEL_MOVEMENT_COMPANY_COLUMN", "GER_CODEMP")
   movement_client_column = get_safe_identifier("CITEL_MOVEMENT_CLIENT_COLUMN", "GER_CODCLI")
   sales_sequence_column = get_safe_identifier("CITEL_SALES_SEQUENCE_COLUMN", "CPG_SEQUEN")
+  sales_date_column = get_safe_identifier("CITEL_SALES_DATE_COLUMN", "CPG_DTAENT")
+  sales_time_column = get_safe_identifier("CITEL_SALES_TIME_COLUMN", "CPG_HORENT")
   sales_document_column = get_safe_identifier("CITEL_SALES_DOCUMENT_COLUMN", "CPG_NUMDOC")
   sales_document_type_column = get_safe_identifier("CITEL_SALES_DOCUMENT_TYPE_COLUMN", "CPG_ESPDOC")
   sales_client_column = get_safe_identifier("CITEL_SALES_CLIENT_COLUMN", "CPG_CODCLI")
@@ -215,16 +218,21 @@ def build_detailed_coupon_query():
   address_column = get_safe_identifier("CITEL_ADDRESS_COLUMN", "CLI_ENDERE")
   neighborhood_column = get_safe_identifier("CITEL_NEIGHBORHOOD_COLUMN", "CLI_BAIRRO")
   zipcode_column = get_safe_identifier("CITEL_ZIPCODE_COLUMN", "CLI_C_E_P_")
+  seller_code_column = get_safe_identifier("CITEL_SELLER_CODE_COLUMN", "OPE_CODOPE")
+  seller_name_column = get_safe_identifier("CITEL_SELLER_NAME_COLUMN", "OPE_NOMOPE")
   return text(
     f"""
     SELECT
       sales.{sales_sequence_column} AS coupon_code,
+      sales.{sales_date_column} AS sale_date,
+      sales.{sales_time_column} AS sale_time,
       sales.{sales_document_column} AS document_number,
       sales.{sales_document_type_column} AS document_type,
       clients.{cpf_column} AS cpf,
       sales.{sales_client_column} AS customer_code,
       sales.{amount_column} AS document_amount,
       clients.{seller_column} AS seller_code,
+      sellers.{seller_name_column} AS seller_name,
       clients.{customer_name_column} AS customer_name,
       clients.{phone_column} AS customer_phone,
       clients.{mobile_column} AS customer_mobile,
@@ -234,6 +242,8 @@ def build_detailed_coupon_query():
     FROM {sales_table} AS sales
     INNER JOIN {client_table} AS clients
       ON sales.{sales_client_column} = clients.{client_code_column}
+    LEFT JOIN {seller_table} AS sellers
+      ON clients.{seller_column} = sellers.{seller_code_column}
     INNER JOIN {movement_table} AS movements
       ON movements.{movement_document_column} = sales.{sales_document_column}
       AND movements.{movement_document_type_column} = sales.{sales_document_type_column}
@@ -248,11 +258,14 @@ def build_detailed_coupon_query():
 def row_to_detailed_coupon_record(row: RowMapping) -> dict[str, Any] | None:
   cpf = normalize_cpf(row["cpf"])
   coupon_code = str(row["coupon_code"] or "").strip()
+  sale_date = str(row["sale_date"] or "").strip()
+  sale_time = str(row["sale_time"] or "").strip()
   document_number = str(row["document_number"] or "").strip()
   document_type = str(row["document_type"] or "").strip()
   customer_code = str(row["customer_code"] or "").strip()
   customer_name = str(row["customer_name"] or "").strip()
   seller_code = str(row["seller_code"] or "").strip()
+  seller_name = str(row["seller_name"] or "").strip()
   customer_phone = str(row["customer_phone"] or "").strip()
   customer_mobile = str(row["customer_mobile"] or "").strip()
   customer_address = str(row["customer_address"] or "").strip()
@@ -265,12 +278,15 @@ def row_to_detailed_coupon_record(row: RowMapping) -> dict[str, Any] | None:
 
   return {
     "code": coupon_code,
+    "sale_date": sale_date,
+    "sale_time": sale_time,
     "cpf": cpf,
     "document_number": document_number,
     "document_type": document_type,
     "customer_code": customer_code,
     "customer_name": customer_name,
     "seller_code": seller_code,
+    "seller_name": seller_name,
     "customer_phone": customer_phone,
     "customer_mobile": customer_mobile,
     "customer_address": customer_address,
@@ -299,23 +315,47 @@ def build_sales_query():
   client_code_column = get_safe_identifier("CITEL_CLIENT_CODE_COLUMN", "CLI_CODCLI")
   cpf_column = get_safe_identifier("CITEL_CPF_COLUMN", "CLI_C_G_C_")
   amount_column = get_safe_identifier("CITEL_AMOUNT_COLUMN", "CPG_VALDOC")
+  customer_name_column = get_safe_identifier("CITEL_CUSTOMER_NAME_COLUMN", "CLI_NOMCLI")
 
   return text(
     f"""
     SELECT
       clients.{cpf_column} AS cpf,
-      SUM(sales.{amount_column}) AS total_faturamento
-    FROM {sales_table} AS sales
-    INNER JOIN {client_table} AS clients
+      clients.{client_code_column} AS customer_code,
+      clients.{customer_name_column} AS customer_name,
+      COALESCE(
+        SUM(
+          CASE
+            WHEN TRIM(CAST(movements.{movement_increment_column} AS CHAR)) <> ''
+            THEN sales.{amount_column}
+            ELSE 0
+          END
+        ),
+        0
+      ) AS total_faturamento,
+      COALESCE(
+        COUNT(
+          CASE
+            WHEN TRIM(CAST(movements.{movement_increment_column} AS CHAR)) <> ''
+            THEN 1
+            ELSE NULL
+          END
+        ),
+        0
+      ) AS cupons_disponiveis
+    FROM {client_table} AS clients
+    LEFT JOIN {sales_table} AS sales
       ON sales.{sales_client_column} = clients.{client_code_column}
-    INNER JOIN {movement_table} AS movements
+    LEFT JOIN {movement_table} AS movements
       ON movements.{movement_document_column} = sales.{sales_document_column}
       AND movements.{movement_document_type_column} = sales.{sales_document_type_column}
       AND movements.{movement_company_column} = sales.{sales_company_column}
       AND movements.{movement_client_column} = sales.{sales_client_column}
     WHERE clients.{cpf_column} IS NOT NULL
-      AND TRIM(CAST(movements.{movement_increment_column} AS CHAR)) <> ''
-    GROUP BY clients.{cpf_column}
+    GROUP BY
+      clients.{cpf_column},
+      clients.{client_code_column},
+      clients.{customer_name_column}
     """
   )
 
@@ -345,14 +385,18 @@ def build_columns_query(table_name: str):
 def row_to_coupon_record(row: RowMapping) -> dict[str, Any] | None:
   cpf = normalize_cpf(row["cpf"])
   total_faturamento = to_float(row["total_faturamento"])
+  customer_code = str(row["customer_code"] or "").strip()
+  customer_name = str(row["customer_name"] or "").strip()
 
   if len(cpf) != 11:
     return None
 
   return {
     "cpf": cpf,
+    "customer_code": customer_code,
+    "customer_name": customer_name,
     "total_faturamento": round(total_faturamento, 2),
-    "cupons_disponiveis": int(total_faturamento // 100),
+    "cupons_disponiveis": int(row["cupons_disponiveis"] or 0),
   }
 
 
