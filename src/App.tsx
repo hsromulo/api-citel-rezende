@@ -40,6 +40,7 @@ interface FeedbackModalState {
 }
 
 const CUSTOMER_SESSION_KEY = 'selecao-herois-customer-session';
+const CPF_LOOKUP_TIMEOUT_MS = 15000;
 
 type CustomerSession = {
   cpf: string;
@@ -64,6 +65,18 @@ const loadCustomerSession = (): CustomerSession | null => {
     return null;
   }
 };
+
+const withTimeout = async <T,>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  message: string
+) =>
+  Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    }),
+  ]);
 
 function App() {
   const [adminMode, setAdminMode] = useState(() =>
@@ -181,7 +194,30 @@ function App() {
     setCustomerName('');
     setEmptyCouponMessage('');
 
-    const result = await getCouponsByCpf(cpf);
+    let result;
+
+    try {
+      result = await withTimeout(
+        getCouponsByCpf(cpf),
+        CPF_LOOKUP_TIMEOUT_MS,
+        'A consulta demorou mais que o esperado. Tente novamente em alguns instantes.'
+      );
+    } catch (error) {
+      setCouponData({
+        id: '',
+        code: '',
+        cpf,
+        documentNumber: '',
+        isValid: false,
+        title: 'Não foi possível consultar',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível consultar este CPF agora.',
+      });
+      setStatus('error');
+      return;
+    }
 
     if (!result.success) {
       setCouponData({
@@ -223,7 +259,17 @@ function App() {
     setQuestionError('');
     setShowQuestionModal(false);
 
-    const refreshedCoupons = await getCouponsByCpf(customerCpf);
+    let refreshedCoupons;
+
+    try {
+      refreshedCoupons = await withTimeout(
+        getCouponsByCpf(customerCpf),
+        CPF_LOOKUP_TIMEOUT_MS,
+        'A atualização dos cupons demorou mais que o esperado.'
+      );
+    } catch {
+      return;
+    }
 
     if (refreshedCoupons.success) {
       setCustomerCoupons(refreshedCoupons.coupons);

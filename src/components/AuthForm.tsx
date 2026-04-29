@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './AuthForm.css';
-import { formatCPF, isValidCPF } from '../services/supabaseService';
+import { formatCPF } from '../services/supabaseService';
 
 interface AuthFormProps {
   onAuthenticate: (cpf: string) => void;
@@ -27,8 +27,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
       newErrors.cpf = 'Digite o CPF para continuar.';
     } else if (cpfDigits.length !== 11) {
       newErrors.cpf = 'O CPF precisa ter 11 números.';
-    } else if (!isValidCPF(cpfDigits)) {
-      newErrors.cpf = 'CPF inválido. Confira os números e tente novamente.';
     }
 
     setErrors(newErrors);

@@ -527,10 +527,10 @@ export const validateCoupon = async (
     };
   }
 
-  if (cleanCpf && !isValidCPF(cleanCpf)) {
+  if (cleanCpf && cleanCpf.length !== 11) {
     return {
       success: false,
-      message: 'CPF inválido. Digite um CPF válido.',
+      message: 'CPF inválido. Digite um CPF com 11 números.',
     };
   }
 
@@ -593,10 +593,10 @@ export const validateCoupon = async (
 export const getCouponsByCpf = async (cpf: string): Promise<CustomerCouponLookup> => {
   const cleanCpf = cpf.replace(/\D/g, '');
 
-  if (!isValidCPF(cleanCpf)) {
+  if (cleanCpf.length !== 11) {
     return {
       success: false,
-      message: 'CPF inválido. Digite um CPF válido.',
+      message: 'CPF inválido. Digite um CPF com 11 números.',
       coupons: [] as CustomerCoupon[],
       source: 'validation' as const,
     };
