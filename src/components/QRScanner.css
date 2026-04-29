@@ -1,0 +1,83 @@
+/* QR Scanner Component */
+.qr-scanner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  padding: var(--spacing-md);
+}
+
+.scanner-card {
+  background: var(--color-rezende-white);
+  border-radius: 24px;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+  max-width: 550px;
+  width: 100%;
+}
+
+.scanner-card h2 {
+  color: var(--color-rezende-primary);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.scanner-instruction {
+  text-align: center;
+  color: var(--color-muted);
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.8;
+}
+
+.qr-reader {
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+  background-color: #000;
+}
+
+.qr-reader > div {
+  border-radius: 18px;
+}
+
+.scanner-info {
+  background-color: rgba(250, 204, 21, 0.12);
+  border-left: 4px solid var(--color-rezende-secondary);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.scanner-info p {
+  margin: 0;
+  color: #facc15;
+}
+
+.btn-cancel {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .qr-scanner-container {
+    min-height: 400px;
+    padding: var(--spacing-sm);
+  }
+
+  .scanner-card {
+    padding: var(--spacing-md);
+  }
+
+  .scanner-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .scanner-info {
+    font-size: 0.85rem;
+    padding: var(--spacing-sm);
+  }
+}

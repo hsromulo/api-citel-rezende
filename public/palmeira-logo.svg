@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160" role="img" aria-label="Palmeira Tintas">
+  <rect width="220" height="160" fill="white"/>
+  <rect x="58" y="12" width="104" height="90" rx="6" fill="#dff3ee"/>
+  <rect x="62" y="16" width="10" height="82" fill="#2f8053"/>
+  <path d="M82 90 C78 48 120 18 148 26 C110 36 98 54 98 90 Z" fill="#f4d93f"/>
+  <path d="M92 90 C84 68 98 42 126 34 C114 44 110 62 112 90 Z" fill="#f47f2c"/>
+  <path d="M112 90 C106 70 120 48 142 44 C130 54 128 68 130 90 Z" fill="#d94b42"/>
+  <path d="M130 90 C132 60 150 40 180 26 L180 90 Z" fill="#4c9f70"/>
+  <path d="M78 90 C84 78 94 72 106 72 L106 90 Z" fill="#5ea6de"/>
+  <text x="24" y="132" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" fill="#2f8053">Palmeira</text>
+  <text x="146" y="148" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" fill="#d94b42">TINTAS</text>
+</svg>

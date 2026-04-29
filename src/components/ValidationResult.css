@@ -1,0 +1,145 @@
+/* Validation Result Component */
+.validation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  padding: var(--spacing-md);
+}
+
+.result-card {
+  background: var(--color-rezende-white);
+  border-radius: 24px;
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  border-top: 5px solid var(--color-rezende-primary);
+}
+
+.result-card.success {
+  border-top-color: var(--color-success);
+}
+
+.result-card.error {
+  border-top-color: var(--color-error);
+}
+
+.result-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.icon-success {
+  color: var(--color-success);
+  font-weight: bold;
+}
+
+.icon-error {
+  color: var(--color-error);
+  font-weight: bold;
+}
+
+.result-card.success .result-icon {
+  background-color: rgba(34, 197, 94, 0.12);
+}
+
+.result-card.error .result-icon {
+  background-color: rgba(248, 113, 113, 0.12);
+}
+
+.result-card h2 {
+  color: var(--color-rezende-primary);
+  font-size: 1.75rem;
+  margin-bottom: var(--spacing-md);
+  font-weight: 700;
+}
+
+.result-message {
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.coupon-details {
+  background-color: var(--color-rezende-light);
+  padding: var(--spacing-md);
+  border-radius: 18px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.coupon-details p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin: 0;
+}
+
+.coupon-details strong {
+  color: var(--color-rezende-primary);
+  font-weight: 600;
+}
+
+.code {
+  background-color: var(--color-rezende-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 10px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--color-rezende-secondary);
+  letter-spacing: 1px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.button-group .btn {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .validation-container {
+    min-height: 400px;
+    padding: var(--spacing-sm);
+  }
+
+  .result-card {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .result-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 3rem;
+  }
+
+  .result-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .result-message {
+    font-size: 1rem;
+  }
+
+  .coupon-details p {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
