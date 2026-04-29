@@ -13,7 +13,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-29.2"
+APP_VERSION = "2026-04-29.3"
 SYNC_LOCK = Lock()
 SYNC_STATE: dict[str, Any] = {
   "running": False,
@@ -498,13 +498,20 @@ def root():
   }
 
 
-def run_coupon_sync(full_refresh: bool = False) -> dict[str, Any]:
+def run_coupon_sync(
+  full_refresh: bool = False,
+  include_summary: bool = False,
+) -> dict[str, Any]:
   engine = get_citel_engine()
 
   try:
     with engine.connect() as connection:
       coupon_rows = connection.execute(build_detailed_coupon_query()).mappings().all()
-      summary_rows = connection.execute(build_sales_query()).mappings().all()
+      summary_rows = (
+        connection.execute(build_sales_query()).mappings().all()
+        if include_summary or full_refresh
+        else []
+      )
   except Exception as exc:
     raise HTTPException(
       status_code=502,
@@ -536,7 +543,8 @@ def run_coupon_sync(full_refresh: bool = False) -> dict[str, Any]:
     if full_refresh:
       clear_synced_supabase_data()
     upsert_coupons(coupon_records)
-    upsert_client_coupons(summary_records)
+    if summary_records:
+      upsert_client_coupons(summary_records)
   except Exception as exc:
     if isinstance(exc, HTTPException):
       raise
@@ -553,10 +561,14 @@ def run_coupon_sync(full_refresh: bool = False) -> dict[str, Any]:
     "upserted_coupons": len(coupon_records),
     "upserted_clients": len(summary_records),
     "full_refresh": full_refresh,
+    "include_summary": include_summary or full_refresh,
   }
 
 
-def run_coupon_sync_in_background(full_refresh: bool = False) -> None:
+def run_coupon_sync_in_background(
+  full_refresh: bool = False,
+  include_summary: bool = False,
+) -> None:
   if not SYNC_LOCK.acquire(blocking=False):
     return
 
@@ -564,7 +576,10 @@ def run_coupon_sync_in_background(full_refresh: bool = False) -> None:
   SYNC_STATE["last_error"] = None
 
   try:
-    SYNC_STATE["last_result"] = run_coupon_sync(full_refresh=full_refresh)
+    SYNC_STATE["last_result"] = run_coupon_sync(
+      full_refresh=full_refresh,
+      include_summary=include_summary,
+    )
   except Exception as exc:
     SYNC_STATE["last_error"] = str(exc)
   finally:
@@ -577,10 +592,14 @@ def sync_client_coupons(
   token: str | None = Query(default=None),
   x_sync_token: str | None = Header(default=None),
   full_refresh: bool = Query(default=False),
+  include_summary: bool = Query(default=False),
 ):
   validate_sync_token(token=token, x_sync_token=x_sync_token)
 
-  return run_coupon_sync(full_refresh=full_refresh)
+  return run_coupon_sync(
+    full_refresh=full_refresh,
+    include_summary=include_summary,
+  )
 
 
 @app.get("/sync/trigger")
@@ -589,6 +608,7 @@ def trigger_coupon_sync(
   token: str | None = Query(default=None),
   x_sync_token: str | None = Header(default=None),
   full_refresh: bool = Query(default=False),
+  include_summary: bool = Query(default=False),
 ):
   validate_sync_token(token=token, x_sync_token=x_sync_token)
 
@@ -604,6 +624,7 @@ def trigger_coupon_sync(
   background_tasks.add_task(
     run_coupon_sync_in_background,
     full_refresh=full_refresh,
+    include_summary=include_summary,
   )
 
   return {
@@ -611,6 +632,7 @@ def trigger_coupon_sync(
     "status": "started",
     "message": "Sincronizacao iniciada em segundo plano.",
     "full_refresh": full_refresh,
+    "include_summary": include_summary or full_refresh,
     "last_result": SYNC_STATE["last_result"],
     "last_error": SYNC_STATE["last_error"],
   }
