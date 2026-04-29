@@ -12,7 +12,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-28.7"
+APP_VERSION = "2026-04-29.1"
 
 
 def get_required_env(name: str) -> str:
@@ -495,6 +495,7 @@ def root():
 def sync_client_coupons(
   token: str | None = Query(default=None),
   x_sync_token: str | None = Header(default=None),
+  full_refresh: bool = Query(default=False),
 ):
   validate_sync_token(token=token, x_sync_token=x_sync_token)
 
@@ -532,7 +533,8 @@ def sync_client_coupons(
     }
 
   try:
-    clear_synced_supabase_data()
+    if full_refresh:
+      clear_synced_supabase_data()
     upsert_coupons(coupon_records)
     upsert_client_coupons(summary_records)
   except Exception as exc:
@@ -550,6 +552,7 @@ def sync_client_coupons(
     "processed_clients": len(summary_rows),
     "upserted_coupons": len(coupon_records),
     "upserted_clients": len(summary_records),
+    "full_refresh": full_refresh,
   }
 
 
