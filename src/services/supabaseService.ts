@@ -48,6 +48,7 @@ export type CustomerCouponLookup = {
 };
 
 const useLocalTestCoupons = false;
+const useClientCouponSummaryFallback = false;
 
 export const formatCPF = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -660,6 +661,26 @@ export const getCouponsByCpf = async (cpf: string): Promise<CustomerCouponLookup
       success: true,
       coupons: couponsWithValidationStatus,
       source: 'supabase' as const,
+    };
+  }
+
+  if (!useClientCouponSummaryFallback) {
+    if (error) {
+      console.warn('Busca em coupons indisponível:', error);
+
+      return {
+        success: false,
+        message: 'Não foi possível consultar este CPF no banco de dados.',
+        coupons: [] as CustomerCoupon[],
+        source: 'supabase' as const,
+      };
+    }
+
+    return {
+      success: false,
+      coupons: [] as CustomerCoupon[],
+      source: 'supabase' as const,
+      message: 'CPF não localizado ou sem cupons disponíveis.',
     };
   }
 

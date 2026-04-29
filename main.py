@@ -14,6 +14,7 @@ from sqlalchemy.engine import RowMapping
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
 APP_VERSION = "2026-04-29.3"
+MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION = 5000
 SYNC_LOCK = Lock()
 SYNC_STATE: dict[str, Any] = {
   "running": False,
@@ -501,6 +502,7 @@ def root():
 def run_coupon_sync(
   full_refresh: bool = False,
   include_summary: bool = False,
+  allow_large_summary: bool = False,
 ) -> dict[str, Any]:
   engine = get_citel_engine()
 
@@ -529,6 +531,27 @@ def run_coupon_sync(
     if (record := row_to_coupon_record(row)) is not None
   ]
   summary_records = merge_client_coupon_records(summary_records)
+
+  if (
+    summary_records
+    and len(summary_records) > MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION
+    and not allow_large_summary
+  ):
+    return {
+      "success": False,
+      "message": (
+        "Resumo de clientes muito grande para sincronizacao automatica. "
+        "Use allow_large_summary=true somente em uma execucao manual planejada."
+      ),
+      "processed_coupons": len(coupon_rows),
+      "processed_clients": len(summary_rows),
+      "upserted_coupons": 0,
+      "upserted_clients": 0,
+      "full_refresh": full_refresh,
+      "include_summary": include_summary or full_refresh,
+      "summary_records": len(summary_records),
+      "summary_limit": MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION,
+    }
 
   if not coupon_records and not summary_records:
     return {
@@ -562,12 +585,14 @@ def run_coupon_sync(
     "upserted_clients": len(summary_records),
     "full_refresh": full_refresh,
     "include_summary": include_summary or full_refresh,
+    "summary_records": len(summary_records),
   }
 
 
 def run_coupon_sync_in_background(
   full_refresh: bool = False,
   include_summary: bool = False,
+  allow_large_summary: bool = False,
 ) -> None:
   if not SYNC_LOCK.acquire(blocking=False):
     return
@@ -579,6 +604,7 @@ def run_coupon_sync_in_background(
     SYNC_STATE["last_result"] = run_coupon_sync(
       full_refresh=full_refresh,
       include_summary=include_summary,
+      allow_large_summary=allow_large_summary,
     )
   except Exception as exc:
     SYNC_STATE["last_error"] = str(exc)
@@ -593,12 +619,14 @@ def sync_client_coupons(
   x_sync_token: str | None = Header(default=None),
   full_refresh: bool = Query(default=False),
   include_summary: bool = Query(default=False),
+  allow_large_summary: bool = Query(default=False),
 ):
   validate_sync_token(token=token, x_sync_token=x_sync_token)
 
   return run_coupon_sync(
     full_refresh=full_refresh,
     include_summary=include_summary,
+    allow_large_summary=allow_large_summary,
   )
 
 
@@ -609,6 +637,7 @@ def trigger_coupon_sync(
   x_sync_token: str | None = Header(default=None),
   full_refresh: bool = Query(default=False),
   include_summary: bool = Query(default=False),
+  allow_large_summary: bool = Query(default=False),
 ):
   validate_sync_token(token=token, x_sync_token=x_sync_token)
 
@@ -625,6 +654,7 @@ def trigger_coupon_sync(
     run_coupon_sync_in_background,
     full_refresh=full_refresh,
     include_summary=include_summary,
+    allow_large_summary=allow_large_summary,
   )
 
   return {
@@ -633,6 +663,7 @@ def trigger_coupon_sync(
     "message": "Sincronizacao iniciada em segundo plano.",
     "full_refresh": full_refresh,
     "include_summary": include_summary or full_refresh,
+    "allow_large_summary": allow_large_summary,
     "last_result": SYNC_STATE["last_result"],
     "last_error": SYNC_STATE["last_error"],
   }
