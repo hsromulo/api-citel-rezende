@@ -1,18 +1,25 @@
 import os
 import re
+from threading import Lock
 from decimal import Decimal
 from typing import Any
 from urllib.parse import quote_plus
 
 import httpx
-from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-29.1"
+APP_VERSION = "2026-04-29.2"
+SYNC_LOCK = Lock()
+SYNC_STATE: dict[str, Any] = {
+  "running": False,
+  "last_result": None,
+  "last_error": None,
+}
 
 
 def get_required_env(name: str) -> str:
@@ -491,14 +498,7 @@ def root():
   }
 
 
-@app.get("/sync")
-def sync_client_coupons(
-  token: str | None = Query(default=None),
-  x_sync_token: str | None = Header(default=None),
-  full_refresh: bool = Query(default=False),
-):
-  validate_sync_token(token=token, x_sync_token=x_sync_token)
-
+def run_coupon_sync(full_refresh: bool = False) -> dict[str, Any]:
   engine = get_citel_engine()
 
   try:
@@ -553,6 +553,66 @@ def sync_client_coupons(
     "upserted_coupons": len(coupon_records),
     "upserted_clients": len(summary_records),
     "full_refresh": full_refresh,
+  }
+
+
+def run_coupon_sync_in_background(full_refresh: bool = False) -> None:
+  if not SYNC_LOCK.acquire(blocking=False):
+    return
+
+  SYNC_STATE["running"] = True
+  SYNC_STATE["last_error"] = None
+
+  try:
+    SYNC_STATE["last_result"] = run_coupon_sync(full_refresh=full_refresh)
+  except Exception as exc:
+    SYNC_STATE["last_error"] = str(exc)
+  finally:
+    SYNC_STATE["running"] = False
+    SYNC_LOCK.release()
+
+
+@app.get("/sync")
+def sync_client_coupons(
+  token: str | None = Query(default=None),
+  x_sync_token: str | None = Header(default=None),
+  full_refresh: bool = Query(default=False),
+):
+  validate_sync_token(token=token, x_sync_token=x_sync_token)
+
+  return run_coupon_sync(full_refresh=full_refresh)
+
+
+@app.get("/sync/trigger")
+def trigger_coupon_sync(
+  background_tasks: BackgroundTasks,
+  token: str | None = Query(default=None),
+  x_sync_token: str | None = Header(default=None),
+  full_refresh: bool = Query(default=False),
+):
+  validate_sync_token(token=token, x_sync_token=x_sync_token)
+
+  if SYNC_STATE["running"] or SYNC_LOCK.locked():
+    return {
+      "success": True,
+      "status": "already_running",
+      "message": "Sincronizacao ja esta em andamento.",
+      "last_result": SYNC_STATE["last_result"],
+      "last_error": SYNC_STATE["last_error"],
+    }
+
+  background_tasks.add_task(
+    run_coupon_sync_in_background,
+    full_refresh=full_refresh,
+  )
+
+  return {
+    "success": True,
+    "status": "started",
+    "message": "Sincronizacao iniciada em segundo plano.",
+    "full_refresh": full_refresh,
+    "last_result": SYNC_STATE["last_result"],
+    "last_error": SYNC_STATE["last_error"],
   }
 
 
