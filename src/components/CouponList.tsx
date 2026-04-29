@@ -39,11 +39,25 @@ const numeroAleatorio = randomValues[0];
 const posicaoVencedora = numeroAleatorio % totalDeCuponsValidados;
 const cupomSorteado = participantes[posicaoVencedora];`;
 const LOCAL_DRAW_HISTORY_KEY = 'selecao-herois-local-draw-history';
+const LOCAL_PRIZE_ITEMS_KEY = 'selecao-herois-prize-items';
 
 const isMissingDrawTableError = (error: { code?: string; message?: string }) =>
   error.code === '42P01' ||
   String(error.message || '').toLowerCase().includes('public.draws') ||
   String(error.message || '').toLowerCase().includes('schema cache');
+
+const loadPrizeItems = () => {
+  try {
+    const saved = window.localStorage.getItem(LOCAL_PRIZE_ITEMS_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+
+    return Array.isArray(parsed)
+      ? parsed.filter((item) => typeof item === 'string' && item.trim())
+      : [];
+  } catch {
+    return [];
+  }
+};
 
 export default function CouponList({ onBack }: CouponListProps) {
   const [data, setData] = useState<Validation[]>([]);
@@ -51,6 +65,8 @@ export default function CouponList({ onBack }: CouponListProps) {
   const [selectedWinner, setSelectedWinner] = useState<Validation | null>(null);
   const [selectedPrizeItem, setSelectedPrizeItem] = useState('');
   const [prizeItem, setPrizeItem] = useState('');
+  const [newPrizeItem, setNewPrizeItem] = useState('');
+  const [prizeItems, setPrizeItems] = useState<string[]>(() => loadPrizeItems());
   const [drawMessage, setDrawMessage] = useState('');
   const [listMessage, setListMessage] = useState('');
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
@@ -91,6 +107,41 @@ export default function CouponList({ onBack }: CouponListProps) {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      LOCAL_PRIZE_ITEMS_KEY,
+      JSON.stringify(prizeItems)
+    );
+  }, [prizeItems]);
+
+  const handleAddPrizeItem = () => {
+    const cleanPrizeItem = newPrizeItem.trim();
+
+    if (!cleanPrizeItem) {
+      setDrawMessage('Digite o item/prêmio antes de adicionar.');
+      return;
+    }
+
+    setPrizeItems((current) => {
+      const alreadyExists = current.some(
+        (item) => item.toLowerCase() === cleanPrizeItem.toLowerCase()
+      );
+
+      return alreadyExists ? current : [...current, cleanPrizeItem];
+    });
+    setPrizeItem(cleanPrizeItem);
+    setNewPrizeItem('');
+    setDrawMessage('');
+  };
+
+  const handleRemovePrizeItem = (itemToRemove: string) => {
+    setPrizeItems((current) => current.filter((item) => item !== itemToRemove));
+
+    if (prizeItem === itemToRemove) {
+      setPrizeItem('');
+    }
+  };
 
   const fetchData = async () => {
     setListMessage('');
@@ -519,17 +570,68 @@ export default function CouponList({ onBack }: CouponListProps) {
               </p>
             </div>
 
-            <label className="draw-prize-field">
+            <div className="draw-prize-field">
               <span>Item/prêmio do sorteio</span>
-              <input
-                value={prizeItem}
-                onChange={(event) => {
-                  setPrizeItem(event.target.value);
-                  setDrawMessage('');
-                }}
-                placeholder="Ex.: Vale-compras, TV, kit de ferramentas..."
-              />
-            </label>
+              <div className="draw-prize-add-row">
+                <input
+                  value={newPrizeItem}
+                  onChange={(event) => {
+                    setNewPrizeItem(event.target.value);
+                    setDrawMessage('');
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      handleAddPrizeItem();
+                    }
+                  }}
+                  placeholder="Digite um item para adicionar"
+                />
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-prize-add"
+                  onClick={handleAddPrizeItem}
+                >
+                  Adicionar
+                </button>
+              </div>
+
+              <div className="draw-prize-options">
+                {prizeItems.length === 0 ? (
+                  <p>Nenhum item cadastrado ainda.</p>
+                ) : (
+                  prizeItems.map((item) => (
+                    <label
+                      key={item}
+                      className={`draw-prize-option ${
+                        prizeItem === item ? 'selected' : ''
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="prize-item"
+                        checked={prizeItem === item}
+                        onChange={() => {
+                          setPrizeItem(item);
+                          setDrawMessage('');
+                        }}
+                      />
+                      <strong>{item}</strong>
+                      <button
+                        type="button"
+                        aria-label={`Remover ${item}`}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          handleRemovePrizeItem(item);
+                        }}
+                      >
+                        Remover
+                      </button>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
 
             <button className="btn btn-primary btn-draw" onClick={handleDraw}>
               Realizar sorteio
