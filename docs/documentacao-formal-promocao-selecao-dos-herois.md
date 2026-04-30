@@ -1,44 +1,79 @@
-# Documentacao formal tecnica e operacional
+# Documentação formal técnica e operacional
 
-## Promocao Selecao dos Herois
+## Promoção Seleção dos Heróis
 
-**Versao do documento:** 1.0  
+**Versão do documento:** 1.1  
 **Data:** 30/04/2026  
-**Sistema:** Validacao de cupons e sorteio auditavel da Promocao Selecao dos Herois  
+**Sistema:** Validação de cupons e sorteio auditável da Promoção Seleção dos Heróis  
 **Ambientes:** Vercel, Render, Supabase, cron-job.org e banco AUTCOM/Citel  
+
+---
+
+## Controle do documento
+
+### Histórico de versões
+
+| Versão | Data | Descrição | Responsável |
+| --- | --- | --- | --- |
+| 1.0 | 30/04/2026 | Criação da documentação técnica e operacional da promoção. | Responsável técnico |
+| 1.1 | 30/04/2026 | Inclusão de commit hash do backend, validador público, regra de índice zero-based, responsáveis/aprovações e controle formal de mudanças do algoritmo. | Responsável técnico |
+
+### Responsáveis e aprovações
+
+| Papel | Nome | Data | Assinatura/Validação |
+| --- | --- | --- | --- |
+| Responsável técnico | A preencher | A preencher | A preencher |
+| Responsável pela campanha | A preencher | A preencher | A preencher |
+| Responsável jurídico | A preencher | A preencher | A preencher |
+| Responsável contábil/fiscal | A preencher | A preencher | A preencher |
+| Responsável pela auditoria | A preencher | A preencher | A preencher |
+
+### Controle de mudanças do algoritmo
+
+Qualquer alteração no algoritmo de sorteio deve seguir controle formal de mudança, contendo obrigatoriamente:
+
+- nova versão do algoritmo;
+- data e hora da alteração;
+- commit Git do backend;
+- registro de deploy em produção;
+- atualização deste documento;
+- validação técnica antes de uso oficial;
+- aprovação interna dos responsáveis definidos acima.
+
+Sorteios oficiais devem ser executados apenas após confirmação de que a versão documentada, o commit implantado e a estrutura do banco de dados estão compatíveis.
 
 ---
 
 ## 1. Objetivo
 
-Este documento descreve a arquitetura, o fluxo operacional, os controles de seguranca, a rastreabilidade e o mecanismo de sorteio auditavel utilizados no sistema da Promocao Selecao dos Herois.
+Este documento descreve a arquitetura, o fluxo operacional, os controles de segurança, a rastreabilidade e o mecanismo de sorteio auditável utilizados no sistema da Promoção Seleção dos Heróis.
 
-O objetivo e permitir que a empresa, auditoria, area juridica, area de tecnologia e eventuais orgaos fiscalizadores compreendam:
+O objetivo é permitir que a empresa, auditoria, área jurídica, área de tecnologia e eventuais órgãos fiscalizadores compreendam:
 
-- como os cupons sao gerados e sincronizados;
+- como os cupons são gerados e sincronizados;
 - como o cliente consulta e autentica seus cupons;
-- como o sorteio e executado;
-- quais evidencias sao salvas;
+- como o sorteio é executado;
+- quais evidências são salvas;
 - como validar tecnicamente um sorteio realizado;
-- quais dados ficam publicos e quais ficam restritos.
+- quais dados ficam públicos e quais ficam restritos.
 
-Este documento e tecnico-operacional. Ele nao substitui analise juridica, contabilidade, regulamento oficial da campanha, termo de autorizacao ou prestacao de contas exigidos por orgao competente.
+Este documento é técnico-operacional. Ele não substitui análise jurídica, contabilidade, regulamento oficial da campanha, termo de autorização ou prestação de contas exigidos por órgão competente.
 
 ---
 
-## 2. Referencias regulatorias oficiais
+## 2. Referências regulatórias oficiais
 
-Conforme pagina oficial de Promocao Comercial do Ministerio da Fazenda, a promocao comercial e a distribuicao gratuita de premios a titulo de propaganda, regulamentada pela Lei no 5.768/1971, pelo Decreto no 70.951/1972 e pela Portaria SEAE no 7.638/2022.
+Conforme página oficial de Promoção Comercial do Ministério da Fazenda, a promoção comercial é a distribuição gratuita de prêmios a título de propaganda, regulamentada pela Lei nº 5.768/1971, pelo Decreto nº 70.951/1972 e pela Portaria SEAE nº 7.638/2022.
 
 Fontes oficiais consultadas:
 
-- Ministerio da Fazenda - Promocao Comercial: https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/promocao-comercial/promocao-comercial
-- Ministerio da Fazenda - Legislacao aplicavel: https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/promocao-comercial/promocao-comercial/qual-a-legislacao-e
+- Ministério da Fazenda - Promoção Comercial: https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/promocao-comercial/promocao-comercial
+- Ministério da Fazenda - Legislação aplicável: https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/promocao-comercial/promocao-comercial/qual-a-legislacao-e
 - Ministerio da Fazenda - Modalidades: https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/promocao-comercial/promocao-comercial/quais-as-modalidades-de
 - Ministerio da Fazenda - SCPC: https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/despublicados/promocao-comercial/scpc
 - Ministerio da Fazenda - Estrutura da SPA: https://www.gov.br/fazenda/pt-br/internet/despublicados/conheca-a-spa
 
-Observacao importante: de acordo com as fontes oficiais disponiveis em 30/04/2026, a autorizacao, regulacao, fiscalizacao e sancionamento de promocoes comerciais sao atribuidos a Secretaria de Premios e Apostas do Ministerio da Fazenda, por meio do Sistema de Controle de Promocoes Comerciais - SCPC. Qualquer referencia operacional a Caixa Economica Federal deve ser validada pelo juridico ou contador responsavel antes de protocolo oficial.
+Observação importante: de acordo com as fontes oficiais disponíveis em 30/04/2026, a autorização, regulação, fiscalização e sancionamento de promoções comerciais são atribuídos à Secretaria de Prêmios e Apostas do Ministério da Fazenda, por meio do Sistema de Controle de Promoções Comerciais - SCPC. Qualquer referência operacional à Caixa Econômica Federal deve ser validada pelo jurídico ou contador responsável antes de protocolo oficial.
 
 ---
 
@@ -46,25 +81,25 @@ Observacao importante: de acordo com as fontes oficiais disponiveis em 30/04/202
 
 O sistema cobre:
 
-- sincronizacao de cupons elegiveis a partir do AUTCOM/Citel;
+- sincronização de cupons elegíveis a partir do AUTCOM/Citel;
 - consulta de cupons por CPF;
-- autenticacao de participacao pelo cliente;
+- autenticação de participação pelo cliente;
 - registro de cupons validados;
 - selecao de item/premio;
 - sorteio server-side;
-- gravacao de resultado publico;
-- gravacao de auditoria restrita;
-- exibicao de ganhadores ao cliente;
-- exportacao de historicos administrativos;
-- validacao publica de sorteio mediante dados fornecidos pela auditoria.
+- gravação de resultado público;
+- gravação de auditoria restrita;
+- exibição de ganhadores ao cliente;
+- exportação de históricos administrativos;
+- validação pública de sorteio mediante dados fornecidos pela auditoria.
 
 O sistema nao cobre, por si so:
 
-- redacao final do regulamento juridico;
-- submissao da promocao no SCPC;
-- emissao de certificado de autorizacao;
-- recolhimentos, DARF, comprovantes fiscais ou prestacao de contas;
-- verificacao legal da elegibilidade dos premios;
+- redação final do regulamento jurídico;
+- submissão da promoção no SCPC;
+- emissão de certificado de autorização;
+- recolhimentos, DARF, comprovantes fiscais ou prestação de contas;
+- verificação legal da elegibilidade dos prêmios;
 - analise LGPD formal.
 
 ---
@@ -488,6 +523,13 @@ Recomendacoes:
 - evitar compartilhar prints de tokens, chaves ou tabelas com CPF;
 - definir prazo de retencao dos dados;
 - definir responsavel interno por atendimento a solicitacoes de titulares.
+
+Orientação específica para auditoria externa:
+
+- a lista canônica de participantes deve ser compartilhada apenas quando houver necessidade técnica, jurídica, regulatória ou de auditoria;
+- quando possível, o compartilhamento deve ocorrer em ambiente controlado, com registro de quem recebeu os dados e finalidade de uso;
+- a divulgação pública irrestrita da lista completa de participantes não é recomendada, pois a lista contém CPF e outros dados vinculados à participação;
+- o validador público deve ser usado preferencialmente com acompanhamento interno, jurídico ou auditorial, quando envolver dados pessoais identificáveis.
 
 ---
 
