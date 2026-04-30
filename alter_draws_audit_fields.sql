@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS public.draw_audits (
 );
 
 ALTER TABLE public.draw_audits
-  ADD COLUMN IF NOT EXISTS commit_hash TEXT;
+  ADD COLUMN IF NOT EXISTS commit_hash TEXT,
+  ADD COLUMN IF NOT EXISTS admin_user_email TEXT;
 
 ALTER TABLE public.draw_audits ENABLE ROW LEVEL SECURITY;
 

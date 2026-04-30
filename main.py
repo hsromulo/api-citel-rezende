@@ -19,7 +19,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-30.4"
+APP_VERSION = "2026-04-30.5"
 MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION = 5000
 DRAW_ALGORITHM_VERSION = "server-rejection-sampling-256-v1"
 DRAW_ALGORITHM_UPDATED_AT = "2026-04-30"
@@ -912,6 +912,7 @@ def draw_coupon(
         "participants_hash": participants_hash,
         "participants": canonical_participants,
         "admin_user_id": user.get("id"),
+        "admin_user_email": user.get("email"),
       },
     )
   except Exception:
@@ -925,6 +926,7 @@ def draw_coupon(
     "commit_hash": commit_hash,
     "participants_hash": participants_hash,
     "admin_user_id": user.get("id"),
+    "admin_user_email": user.get("email"),
     "winner": {
       **winner,
       "document_type": coupon.get("document_type"),

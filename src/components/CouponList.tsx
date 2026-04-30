@@ -26,6 +26,16 @@ interface DrawRecord extends Validation {
   algorithm_version?: string | null;
   pool_size?: number | null;
   selected_index?: number | null;
+  random_value?: string | null;
+}
+
+interface DrawAuditSummary {
+  drawId: string;
+  poolSize: number;
+  selectedIndex: number;
+  randomValue: string;
+  commitHash: string;
+  adminUserEmail: string;
 }
 
 const SERVER_DRAW_ALGORITHM_VERSION = 'server-rejection-sampling-256-v1';
@@ -80,6 +90,8 @@ export default function CouponList({ onBack }: CouponListProps) {
   const [data, setData] = useState<Validation[]>([]);
   const [drawHistory, setDrawHistory] = useState<DrawRecord[]>([]);
   const [selectedWinner, setSelectedWinner] = useState<Validation | null>(null);
+  const [selectedDrawAudit, setSelectedDrawAudit] =
+    useState<DrawAuditSummary | null>(null);
   const [selectedPrizeItem, setSelectedPrizeItem] = useState('');
   const [prizeItem, setPrizeItem] = useState('');
   const [newPrizeItem, setNewPrizeItem] = useState('');
@@ -277,6 +289,7 @@ export default function CouponList({ onBack }: CouponListProps) {
           algorithm_version: draw.algorithm_version,
           pool_size: draw.pool_size,
           selected_index: draw.selected_index,
+          random_value: draw.random_value,
         };
       })
     );
@@ -311,6 +324,7 @@ export default function CouponList({ onBack }: CouponListProps) {
         algorithm_version: draw.algorithm_version,
         pool_size: draw.pool_size,
         selected_index: draw.selected_index,
+        random_value: draw.random_value,
       };
     });
   };
@@ -372,7 +386,21 @@ export default function CouponList({ onBack }: CouponListProps) {
     const savedDraw = drawResult.draw;
     setSelectedWinner(winner);
     setSelectedPrizeItem(cleanPrizeItem);
-    const commitHash = String(drawResult.commit_hash || '').slice(0, 7);
+    const rawCommitHash = String(drawResult.commit_hash || '');
+    const commitHash = rawCommitHash.slice(0, 7);
+    const poolSize = Number(savedDraw?.pool_size ?? data.length);
+    const selectedIndex = Number(savedDraw?.selected_index ?? 0);
+    const randomValue = String(savedDraw?.random_value ?? '');
+    setSelectedDrawAudit({
+      drawId: String(savedDraw?.id ?? ''),
+      poolSize,
+      selectedIndex,
+      randomValue,
+      commitHash: rawCommitHash,
+      adminUserEmail: String(
+        drawResult.admin_user_email || sessionData.session?.user?.email || ''
+      ),
+    });
     setDrawMessage(
       `Sorteio salvo com auditoria no servidor. Algoritmo atualizado em ${DRAW_ALGORITHM_UPDATED_AT}. Commit do backend: ${commitHash || 'não informado'}. Hash dos participantes: ${drawResult.participants_hash}`
     );
@@ -384,8 +412,9 @@ export default function CouponList({ onBack }: CouponListProps) {
         prize_item: savedDraw?.prize_item ?? cleanPrizeItem,
         algorithm_version:
           savedDraw?.algorithm_version ?? SERVER_DRAW_ALGORITHM_VERSION,
-        pool_size: savedDraw?.pool_size ?? data.length,
-        selected_index: savedDraw?.selected_index ?? 0,
+        pool_size: poolSize,
+        selected_index: selectedIndex,
+        random_value: randomValue,
       },
       ...current,
     ]);
@@ -714,6 +743,39 @@ export default function CouponList({ onBack }: CouponListProps) {
                     .join(' - ') || '-'}
                 </p>
               </div>
+              {selectedDrawAudit && (
+                <div className="winner-audit-grid">
+                  <p>
+                    <strong>ID do sorteio</strong>
+                    {selectedDrawAudit.drawId || '-'}
+                  </p>
+                  <p>
+                    <strong>Total de participantes</strong>
+                    {selectedDrawAudit.poolSize}
+                  </p>
+                  <p>
+                    <strong>Índice técnico (0-based)</strong>
+                    {selectedDrawAudit.selectedIndex}
+                  </p>
+                  <p>
+                    <strong>Posição na lista (1-based)</strong>
+                    {selectedDrawAudit.selectedIndex + 1} de{' '}
+                    {selectedDrawAudit.poolSize}
+                  </p>
+                  <p>
+                    <strong>Número aleatório bruto</strong>
+                    {selectedDrawAudit.randomValue || '-'}
+                  </p>
+                  <p>
+                    <strong>Executado por</strong>
+                    {selectedDrawAudit.adminUserEmail || '-'}
+                  </p>
+                  <p>
+                    <strong>Commit do backend</strong>
+                    {selectedDrawAudit.commitHash || '-'}
+                  </p>
+                </div>
+              )}
               {drawMessage && <p className="draw-message">{drawMessage}</p>}
             </section>
           )}

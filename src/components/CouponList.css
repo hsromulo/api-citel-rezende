@@ -274,11 +274,16 @@
   border-color: rgba(250, 204, 21, 0.26);
 }
 
-.winner-grid {
+.winner-grid,
+.winner-audit-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.85rem;
   margin-top: 1rem;
+}
+
+.winner-audit-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .winner-prize {
@@ -291,7 +296,8 @@
   color: var(--color-rezende-secondary);
 }
 
-.winner-grid p {
+.winner-grid p,
+.winner-audit-grid p {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--color-border);
   border-radius: 16px;
@@ -299,10 +305,12 @@
   display: grid;
   gap: 0.35rem;
   font-weight: 800;
+  overflow-wrap: anywhere;
   padding: 1rem;
 }
 
-.winner-grid strong {
+.winner-grid strong,
+.winner-audit-grid strong {
   color: var(--color-muted);
   font-size: 0.74rem;
   letter-spacing: 0.08em;
@@ -559,7 +567,8 @@
     width: 100%;
   }
 
-  .winner-grid {
+  .winner-grid,
+  .winner-audit-grid {
     grid-template-columns: 1fr;
   }
 

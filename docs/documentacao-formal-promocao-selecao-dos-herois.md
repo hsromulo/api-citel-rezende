@@ -2,7 +2,7 @@
 
 ## Promoção Seleção dos Heróis
 
-**Versão do documento:** 1.1  
+**Versão do documento:** 1.2
 **Data:** 30/04/2026  
 **Sistema:** Validação de cupons e sorteio auditável da Promoção Seleção dos Heróis  
 **Ambientes:** Vercel, Render, Supabase, cron-job.org e banco AUTCOM/Citel  
@@ -17,6 +17,7 @@
 | --- | --- | --- | --- |
 | 1.0 | 30/04/2026 | Criação da documentação técnica e operacional da promoção. | Responsável técnico |
 | 1.1 | 30/04/2026 | Inclusão de commit hash do backend, validador público, regra de índice zero-based, responsáveis/aprovações e controle formal de mudanças do algoritmo. | Responsável técnico |
+| 1.2 | 30/04/2026 | Inclusão dos metadados visíveis na tela de sorteio: ID do sorteio, pool, índice técnico, posição, número aleatório bruto e usuário executor. | Responsável técnico |
 
 ### Responsáveis e aprovações
 
@@ -300,6 +301,7 @@ Campos relevantes:
 - `participants_hash`: hash SHA-256 da lista canonica;
 - `participants`: lista canonica completa;
 - `admin_user_id`: usuario administrador que executou o sorteio;
+- `admin_user_email`: e-mail do usuario administrador que executou o sorteio;
 - `created_at`: data/hora da gravacao.
 
 Esta tabela possui RLS habilitado e deve permanecer restrita a usuarios autenticados/autorizados, pois pode conter dados pessoais.
@@ -562,6 +564,7 @@ Cron-job.org aciona periodicamente:
 Para cada sorteio, recomenda-se arquivar:
 
 - print da tela do ganhador;
+- print da tela de auditoria do sorteio com ID, pool, índice, número aleatório bruto e usuário executor;
 - linha correspondente da tabela `draws`;
 - linha correspondente da tabela `draw_audits`;
 - `participants_hash`;
@@ -573,6 +576,7 @@ Para cada sorteio, recomenda-se arquivar:
 - commit Git do backend;
 - data/hora do sorteio;
 - usuario administrador;
+- e-mail do usuário administrador executor;
 - item/premio sorteado;
 - comprovante de propriedade/aquisicao do premio;
 - regulamento vigente;

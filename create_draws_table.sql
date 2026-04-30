@@ -63,11 +63,13 @@ CREATE TABLE IF NOT EXISTS public.draw_audits (
   participants_hash TEXT NOT NULL,
   participants JSONB NOT NULL,
   admin_user_id TEXT,
+  admin_user_email TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 ALTER TABLE public.draw_audits
-  ADD COLUMN IF NOT EXISTS commit_hash TEXT;
+  ADD COLUMN IF NOT EXISTS commit_hash TEXT,
+  ADD COLUMN IF NOT EXISTS admin_user_email TEXT;
 
 ALTER TABLE public.draw_audits ENABLE ROW LEVEL SECURITY;
 
