@@ -4,6 +4,7 @@ import ValidationResult from './components/ValidationResult';
 import AuthForm from './components/AuthForm';
 import CustomerCouponList from './components/CustomerCouponList';
 import CouponList from './components/CouponList';
+import DrawValidator from './components/DrawValidator';
 import Login from './components/Login';
 import {
   getCurrentUser,
@@ -81,6 +82,9 @@ const withTimeout = async <T,>(
 function App() {
   const [adminMode, setAdminMode] = useState(() =>
     window.location.search.includes('admin=1')
+  );
+  const [validatorMode] = useState(() =>
+    window.location.search.includes('verificador=1')
   );
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [adminChecking, setAdminChecking] = useState(false);
@@ -427,6 +431,27 @@ function App() {
     setAdminMode(true);
     window.history.replaceState({}, '', `${window.location.pathname}?admin=1`);
   };
+
+  if (validatorMode) {
+    return (
+      <div className="app-container">
+        <header className="header">
+          <div className="header-content">
+            <span className="header-kicker">Verificação pública</span>
+            <h1>Validador de Sorteio</h1>
+            <p>
+              Recalcule a prova técnica de um sorteio usando hash, número
+              aleatório bruto e lista canônica de participantes.
+            </p>
+          </div>
+        </header>
+
+        <main className="main-content">
+          <DrawValidator />
+        </main>
+      </div>
+    );
+  }
 
   if (adminMode) {
     return (

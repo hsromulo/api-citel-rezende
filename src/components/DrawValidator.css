@@ -1,0 +1,158 @@
+.draw-validator {
+  width: 100%;
+  max-width: 1080px;
+  background: var(--color-rezende-white);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-lg);
+}
+
+.draw-validator__header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.draw-validator__header h2 {
+  color: var(--color-rezende-primary);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin-bottom: 0.7rem;
+}
+
+.draw-validator__header p,
+.draw-validator label,
+.draw-validator__result p {
+  color: var(--color-muted);
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.draw-validator__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.draw-validator label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.draw-validator input,
+.draw-validator textarea {
+  width: 100%;
+  background: #0b1713;
+  border: 2px solid var(--color-rezende-light);
+  border-radius: 16px;
+  color: var(--color-rezende-dark);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.95rem 1rem;
+}
+
+.draw-validator input:focus,
+.draw-validator textarea:focus {
+  border-color: var(--color-rezende-secondary);
+  box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.16);
+  outline: none;
+}
+
+.draw-validator__participants {
+  margin-top: 1rem;
+}
+
+.draw-validator textarea {
+  min-height: 230px;
+  resize: vertical;
+}
+
+.draw-validator__actions {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.draw-validator__actions .btn {
+  width: auto;
+}
+
+.draw-validator__result {
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+}
+
+.draw-validator__result--valid {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.draw-validator__result--invalid {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.draw-validator__result h3 {
+  color: var(--color-rezende-primary);
+  font-size: 1.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.draw-validator__result--invalid h3 {
+  color: var(--color-error);
+}
+
+.draw-validator__result dl {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.draw-validator__result div {
+  min-width: 0;
+}
+
+.draw-validator__result dt {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.draw-validator__result dd {
+  color: var(--color-rezende-dark);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.draw-validator__winner {
+  margin-top: 1rem;
+}
+
+.draw-validator__winner strong {
+  color: var(--color-rezende-secondary);
+}
+
+.draw-validator__winner pre {
+  background: #07140f;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  color: var(--color-rezende-secondary);
+  margin-top: 0.7rem;
+  overflow: auto;
+  padding: 1rem;
+}
+
+@media (max-width: 720px) {
+  .draw-validator__grid,
+  .draw-validator__result dl {
+    grid-template-columns: 1fr;
+  }
+
+  .draw-validator__actions .btn {
+    width: 100%;
+  }
+}

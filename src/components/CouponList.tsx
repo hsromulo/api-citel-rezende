@@ -668,6 +668,12 @@ export default function CouponList({ onBack }: CouponListProps) {
                 Última alteração do algoritmo:{' '}
                 <strong>{DRAW_ALGORITHM_UPDATED_AT}</strong>
               </p>
+              <p>
+                Validador público:{' '}
+                <a href="/?verificador=1" target="_blank" rel="noreferrer">
+                  abrir verificador de sorteio
+                </a>
+              </p>
               <pre className="algorithm-source">
                 <code>{DRAW_ALGORITHM_SOURCE}</code>
               </pre>
