@@ -28,7 +28,7 @@ interface DrawRecord extends Validation {
   selected_index?: number | null;
 }
 
-const SERVER_DRAW_ALGORITHM_VERSION = 'server-secrets-randbelow-v1';
+const SERVER_DRAW_ALGORITHM_VERSION = 'server-rejection-sampling-256-v1';
 const DRAW_ALGORITHM_UPDATED_AT = '30/04/2026';
 const DRAW_ALGORITHM_VERSION = SERVER_DRAW_ALGORITHM_VERSION;
 const API_BASE_URL =
@@ -37,8 +37,14 @@ const DRAW_ALGORITHM_SOURCE = `participantes = validacoes_autenticadas_ordenadas
 hashDosParticipantes = sha256(JSON.stringify(participantes_canonicos))
 totalDeCuponsValidados = participantes.length
 
-indiceSorteado = secrets.randbelow(totalDeCuponsValidados)
-numeroAleatorioBruto = secrets.randbits(256)
+espacoAleatorio = 2 ** 256
+limiteAceito = espacoAleatorio - (espacoAleatorio % totalDeCuponsValidados)
+
+repita:
+  numeroAleatorioBruto = secrets.randbits(256)
+ate numeroAleatorioBruto < limiteAceito
+
+indiceSorteado = numeroAleatorioBruto % totalDeCuponsValidados
 
 cupomSorteado = participantes[indiceSorteado]
 
@@ -630,9 +636,11 @@ export default function CouponList({ onBack }: CouponListProps) {
                   resultado para auditoria posterior.
                 </li>
                 <li>
-                  O índice vencedor é gerado com <strong>secrets.randbelow</strong>,
-                  uma fonte criptograficamente segura do servidor que evita viés
-                  de módulo.
+                  O servidor gera um número aleatório bruto de 256 bits com
+                  <strong> secrets.randbits</strong> e usa amostragem por rejeição
+                  para evitar viés estatístico. O índice vencedor nasce desse
+                  mesmo número bruto, então o valor salvo na auditoria fica
+                  vinculado matematicamente ao resultado.
                 </li>
                 <li>
                   O sistema salva o resultado público na tabela <strong>draws</strong>

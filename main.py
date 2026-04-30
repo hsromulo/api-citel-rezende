@@ -19,9 +19,9 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-30.2"
+APP_VERSION = "2026-04-30.3"
 MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION = 5000
-DRAW_ALGORITHM_VERSION = "server-secrets-randbelow-v1"
+DRAW_ALGORITHM_VERSION = "server-rejection-sampling-256-v1"
 DRAW_ALGORITHM_UPDATED_AT = "2026-04-30"
 SYNC_LOCK = Lock()
 SYNC_STATE: dict[str, Any] = {
@@ -359,6 +359,16 @@ def build_canonical_participants(participants: list[dict[str, Any]]) -> list[dic
     }
     for item in participants
   ]
+
+
+def choose_unbiased_index(total: int) -> tuple[int, int]:
+  random_space = 1 << 256
+  limit = random_space - (random_space % total)
+
+  while True:
+    random_value = secrets.randbits(256)
+    if random_value < limit:
+      return random_value % total, random_value
 
 
 def build_detailed_coupon_query():
@@ -837,8 +847,7 @@ def draw_coupon(
   )
 
   pool_size = len(validations)
-  selected_index = secrets.randbelow(pool_size)
-  random_value = secrets.randbits(256)
+  selected_index, random_value = choose_unbiased_index(pool_size)
   winner = validations[selected_index]
   canonical_participants = build_canonical_participants(validations)
   participants_hash = build_participants_hash(validations)
