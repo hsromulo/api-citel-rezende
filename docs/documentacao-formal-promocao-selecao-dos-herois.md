@@ -243,7 +243,7 @@ Campos relevantes:
 - `algorithm_version`: versao do algoritmo;
 - `pool_size`: total de participantes;
 - `random_value`: numero aleatorio bruto;
-- `selected_index`: indice sorteado;
+- `selected_index`: indice tecnico sorteado, com base zero;
 - `participants_hash`: hash da lista de participantes;
 - `drawn_at`: data/hora do sorteio.
 
@@ -259,7 +259,7 @@ Campos relevantes:
 - `algorithm_version`: versao do algoritmo;
 - `algorithm_updated_at`: data de alteracao do algoritmo;
 - `pool_size`: total de participantes;
-- `selected_index`: indice sorteado;
+- `selected_index`: indice tecnico sorteado, com base zero;
 - `random_value`: numero aleatorio bruto usado no calculo;
 - `participants_hash`: hash SHA-256 da lista canonica;
 - `participants`: lista canonica completa;
@@ -360,6 +360,8 @@ desde que `random_value` esteja abaixo do limite aceito.
 
 Assim, o resultado pode ser revalidado posteriormente.
 
+Observacao: `selected_index` e um indice tecnico com base zero. Portanto, `selected_index = 1` corresponde ao segundo item da lista canonica; `selected_index = 2` corresponde ao terceiro item.
+
 ### Hash da lista
 
 Antes da selecao do vencedor, o sistema gera um SHA-256 da lista canonica dos participantes.
@@ -412,7 +414,8 @@ Saida:
 - hash calculado;
 - compatibilidade do hash;
 - aceitacao do numero aleatorio;
-- indice vencedor;
+- indice tecnico vencedor, com base zero;
+- posicao humana na lista, com base um;
 - cupom calculado como vencedor.
 
 Observacao: o validador nao busca dados no banco. Isso e proposital. A empresa deve fornecer os dados necessarios em contexto de auditoria, preservando LGPD e evitando exposicao publica automatica de CPF e lista de participantes.

@@ -130,8 +130,8 @@ export default function DrawValidator() {
         <h2>Validador público do sorteio</h2>
         <p>
           Cole o hash, o número aleatório bruto e a lista canônica de
-          participantes. O validador recalcula o hash e o índice vencedor sem
-          consultar o banco.
+          participantes. O validador recalcula o hash, o índice técnico
+          zero-based e a posição humana do vencedor sem consultar o banco.
         </p>
       </div>
 
@@ -201,7 +201,15 @@ export default function DrawValidator() {
                 <dd>{result.randomAccepted ? 'Aceito pela amostragem' : 'Rejeitado'}</dd>
               </div>
               <div>
-                <dt>Índice vencedor</dt>
+                <dt>Índice técnico (0-based)</dt>
+                <dd>
+                  {typeof result.selectedIndex === 'number'
+                    ? `${result.selectedIndex}`
+                    : '-'}
+                </dd>
+              </div>
+              <div>
+                <dt>Posição na lista (1-based)</dt>
                 <dd>
                   {typeof result.selectedIndex === 'number'
                     ? `${result.selectedIndex + 1}`
