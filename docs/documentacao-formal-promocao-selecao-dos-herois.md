@@ -258,6 +258,7 @@ Campos relevantes:
 - `draw_id`: referencia ao sorteio em `draws`;
 - `algorithm_version`: versao do algoritmo;
 - `algorithm_updated_at`: data de alteracao do algoritmo;
+- `commit_hash`: commit Git do backend implantado no Render no momento do sorteio;
 - `pool_size`: total de participantes;
 - `selected_index`: indice tecnico sorteado, com base zero;
 - `random_value`: numero aleatorio bruto usado no calculo;
@@ -283,6 +284,17 @@ Python 3 / FastAPI
 ### Ultima alteracao
 
 30/04/2026 as 09:18
+
+### Commit do codigo em producao
+
+Cada sorteio grava em `draw_audits.commit_hash` o commit Git do backend informado pelo ambiente de producao. No Render, essa informacao vem da variavel padrao `RENDER_GIT_COMMIT`.
+
+Finalidade:
+
+- identificar o codigo exato implantado no momento do sorteio;
+- permitir comparacao com o historico do repositorio;
+- reduzir dependencia de declaracoes manuais sobre qual versao estava em producao;
+- fortalecer a evidencia externa de auditoria.
 
 ### Principios
 
@@ -516,6 +528,7 @@ Para cada sorteio, recomenda-se arquivar:
 - `pool_size`;
 - `participants`;
 - versao do algoritmo;
+- commit Git do backend;
 - data/hora do sorteio;
 - usuario administrador;
 - item/premio sorteado;
@@ -622,6 +635,7 @@ Do ponto de vista tecnico, o desenho permite comprovar:
 - qual indice foi sorteado;
 - qual cupom foi contemplado;
 - qual versao do algoritmo estava vigente;
+- qual commit do backend estava implantado;
 - quando e por qual usuario administrativo o sorteio foi executado.
 
 Para uso em promocao regulamentada, este conjunto deve ser acompanhado de regulamento formal, autorizacao/protocolo no orgao competente, controles LGPD, comprovantes de premios e processo de prestacao de contas.

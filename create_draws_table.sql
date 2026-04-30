@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS public.draw_audits (
   draw_id UUID NOT NULL REFERENCES public.draws(id) ON DELETE CASCADE,
   algorithm_version TEXT NOT NULL,
   algorithm_updated_at DATE NOT NULL,
+  commit_hash TEXT,
   pool_size INTEGER NOT NULL,
   selected_index INTEGER NOT NULL,
   random_value TEXT NOT NULL,
@@ -64,6 +65,9 @@ CREATE TABLE IF NOT EXISTS public.draw_audits (
   admin_user_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+ALTER TABLE public.draw_audits
+  ADD COLUMN IF NOT EXISTS commit_hash TEXT;
 
 ALTER TABLE public.draw_audits ENABLE ROW LEVEL SECURITY;
 

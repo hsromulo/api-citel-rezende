@@ -19,7 +19,7 @@ from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-30.3"
+APP_VERSION = "2026-04-30.4"
 MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION = 5000
 DRAW_ALGORITHM_VERSION = "server-rejection-sampling-256-v1"
 DRAW_ALGORITHM_UPDATED_AT = "2026-04-30"
@@ -46,6 +46,15 @@ app.add_middleware(
 
 class DrawRequest(BaseModel):
   prize_item: str
+
+
+def get_code_commit_hash() -> str:
+  return (
+    os.environ.get("COMMIT_HASH")
+    or os.environ.get("RENDER_GIT_COMMIT")
+    or os.environ.get("GIT_COMMIT")
+    or "unknown"
+  )
 
 
 def get_required_env(name: str) -> str:
@@ -615,6 +624,7 @@ def health():
   return {
     "status": "ok",
     "version": APP_VERSION,
+    "commit_hash": get_code_commit_hash(),
     "database_backend": get_database_backend_name(),
     "has_mysql_host": bool(os.environ.get("MYSQL_HOST")),
     "has_db_host": bool(os.environ.get("DB_HOST")),
@@ -632,6 +642,7 @@ def root():
     "status": "online",
     "service": "api-citel-rezende",
     "version": APP_VERSION,
+    "commit_hash": get_code_commit_hash(),
     "database_backend": get_database_backend_name(),
     "health": "/health",
     "sync": "/sync?token=VALOR_REAL_DO_SYNK_TOKEN",
@@ -865,6 +876,7 @@ def draw_coupon(
   coupon = coupon_rows[0] if coupon_rows else {}
 
   draw_id = str(uuid.uuid4())
+  commit_hash = get_code_commit_hash()
   draw_payload = {
     "id": draw_id,
     "validation_id": winner.get("id"),
@@ -893,6 +905,7 @@ def draw_coupon(
         "draw_id": draw_id,
         "algorithm_version": DRAW_ALGORITHM_VERSION,
         "algorithm_updated_at": DRAW_ALGORITHM_UPDATED_AT,
+        "commit_hash": commit_hash,
         "pool_size": pool_size,
         "selected_index": selected_index,
         "random_value": str(random_value),
@@ -909,6 +922,7 @@ def draw_coupon(
     "success": True,
     "algorithm_version": DRAW_ALGORITHM_VERSION,
     "algorithm_updated_at": DRAW_ALGORITHM_UPDATED_AT,
+    "commit_hash": commit_hash,
     "participants_hash": participants_hash,
     "admin_user_id": user.get("id"),
     "winner": {

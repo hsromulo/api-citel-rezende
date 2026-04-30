@@ -372,8 +372,9 @@ export default function CouponList({ onBack }: CouponListProps) {
     const savedDraw = drawResult.draw;
     setSelectedWinner(winner);
     setSelectedPrizeItem(cleanPrizeItem);
+    const commitHash = String(drawResult.commit_hash || '').slice(0, 7);
     setDrawMessage(
-      `Sorteio salvo com auditoria no servidor. Algoritmo atualizado em ${DRAW_ALGORITHM_UPDATED_AT}. Hash dos participantes: ${drawResult.participants_hash}`
+      `Sorteio salvo com auditoria no servidor. Algoritmo atualizado em ${DRAW_ALGORITHM_UPDATED_AT}. Commit do backend: ${commitHash || 'não informado'}. Hash dos participantes: ${drawResult.participants_hash}`
     );
     setDrawHistory((current) => [
       {
@@ -667,6 +668,10 @@ export default function CouponList({ onBack }: CouponListProps) {
               <p>
                 Última alteração do algoritmo:{' '}
                 <strong>{DRAW_ALGORITHM_UPDATED_AT}</strong>
+              </p>
+              <p>
+                Commit do backend:{' '}
+                <strong>gravado automaticamente em cada sorteio</strong>
               </p>
               <p>
                 Validador público:{' '}
