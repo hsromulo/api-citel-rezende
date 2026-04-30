@@ -251,6 +251,7 @@
   color: var(--color-muted);
   font-weight: 700;
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .draw-kicker {

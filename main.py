@@ -1,5 +1,9 @@
 import os
 import re
+import json
+import hashlib
+import uuid
+import secrets
 from threading import Lock
 from decimal import Decimal
 from typing import Any
@@ -7,20 +11,41 @@ from urllib.parse import quote_plus
 
 import httpx
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import RowMapping
 
 
 app = FastAPI(title="Citel ERP to Supabase Sync API")
-APP_VERSION = "2026-04-29.3"
+APP_VERSION = "2026-04-30.2"
 MAX_SUMMARY_RECORDS_WITHOUT_CONFIRMATION = 5000
+DRAW_ALGORITHM_VERSION = "server-secrets-randbelow-v1"
+DRAW_ALGORITHM_UPDATED_AT = "2026-04-30"
 SYNC_LOCK = Lock()
 SYNC_STATE: dict[str, Any] = {
   "running": False,
   "last_result": None,
   "last_error": None,
 }
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=[
+    "https://projeto-qrcode-two.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:4173",
+  ],
+  allow_origin_regex=r"https://.*\.vercel\.app",
+  allow_credentials=True,
+  allow_methods=["GET", "POST", "OPTIONS"],
+  allow_headers=["Authorization", "Content-Type"],
+)
+
+
+class DrawRequest(BaseModel):
+  prize_item: str
 
 
 def get_required_env(name: str) -> str:
@@ -159,6 +184,36 @@ def get_supabase_config() -> tuple[str, str]:
   return supabase_url, supabase_key
 
 
+def get_supabase_headers() -> dict[str, str]:
+  supabase_url, supabase_key = get_supabase_config()
+
+  return {
+    "apikey": supabase_key,
+    "Authorization": f"Bearer {supabase_key}",
+    "Content-Type": "application/json",
+  }
+
+
+def require_supabase_user(authorization: str | None) -> dict[str, Any]:
+  if not authorization or not authorization.startswith("Bearer "):
+    raise HTTPException(status_code=401, detail="Login administrativo obrigatorio.")
+
+  supabase_url, supabase_key = get_supabase_config()
+  response = httpx.get(
+    f"{supabase_url}/auth/v1/user",
+    headers={
+      "apikey": supabase_key,
+      "Authorization": authorization,
+    },
+    timeout=20,
+  )
+
+  if response.status_code >= 400:
+    raise HTTPException(status_code=401, detail="Sessao administrativa invalida.")
+
+  return response.json()
+
+
 def post_supabase_records(
   table_name: str,
   records: list[dict[str, Any]],
@@ -229,6 +284,81 @@ def upsert_coupons(records: list[dict[str, Any]]) -> None:
 def clear_synced_supabase_data() -> None:
   delete_supabase_records("coupons", "id=not.is.null")
   delete_supabase_records("client_coupons", "cpf=not.is.null")
+
+
+def fetch_supabase_table(
+  table_name: str,
+  params: dict[str, str],
+  range_limit: int = 99999,
+) -> list[dict[str, Any]]:
+  supabase_url, _ = get_supabase_config()
+  response = httpx.get(
+    f"{supabase_url}/rest/v1/{table_name}",
+    params=params,
+    headers={
+      **get_supabase_headers(),
+      "Range": f"0-{range_limit}",
+    },
+    timeout=60,
+  )
+
+  if response.status_code >= 400:
+    raise HTTPException(
+      status_code=502,
+      detail=f"Erro ao consultar {table_name} no Supabase: {response.text}",
+    )
+
+  return response.json()
+
+
+def insert_supabase_record(
+  table_name: str,
+  record: dict[str, Any],
+) -> dict[str, Any]:
+  supabase_url, _ = get_supabase_config()
+  response = httpx.post(
+    f"{supabase_url}/rest/v1/{table_name}",
+    headers={
+      **get_supabase_headers(),
+      "Prefer": "return=representation",
+    },
+    json=[record],
+    timeout=60,
+  )
+
+  if response.status_code >= 400:
+    raise HTTPException(
+      status_code=502,
+      detail=f"Erro ao salvar {table_name} no Supabase: {response.text}",
+    )
+
+  saved = response.json()
+  return saved[0] if saved else record
+
+
+def build_participants_hash(participants: list[dict[str, Any]]) -> str:
+  canonical_participants = build_canonical_participants(participants)
+  payload = json.dumps(
+    canonical_participants,
+    ensure_ascii=False,
+    separators=(",", ":"),
+    sort_keys=True,
+  )
+
+  return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def build_canonical_participants(participants: list[dict[str, Any]]) -> list[dict[str, str]]:
+  return [
+    {
+      "id": str(item.get("id") or ""),
+      "code": str(item.get("code") or ""),
+      "cpf": str(item.get("cpf") or ""),
+      "document": str(item.get("document") or ""),
+      "validated_at": str(item.get("validated_at") or ""),
+    }
+    for item in participants
+  ]
 
 
 def build_detailed_coupon_query():
@@ -666,6 +796,122 @@ def trigger_coupon_sync(
     "allow_large_summary": allow_large_summary,
     "last_result": SYNC_STATE["last_result"],
     "last_error": SYNC_STATE["last_error"],
+  }
+
+
+@app.post("/draw")
+def draw_coupon(
+  draw_request: DrawRequest,
+  authorization: str | None = Header(default=None),
+):
+  user = require_supabase_user(authorization)
+  prize_item = draw_request.prize_item.strip()
+
+  if not prize_item:
+    raise HTTPException(
+      status_code=400,
+      detail="Informe o item/premio do sorteio.",
+    )
+
+  validations = fetch_supabase_table(
+    "validations",
+    {
+      "select": "*",
+      "order": "validated_at.asc,id.asc",
+    },
+  )
+
+  if not validations:
+    raise HTTPException(
+      status_code=400,
+      detail="Ainda nao existem cupons validados para sortear.",
+    )
+
+  fetch_supabase_table(
+    "draw_audits",
+    {
+      "select": "id",
+      "limit": "1",
+    },
+    range_limit=0,
+  )
+
+  pool_size = len(validations)
+  selected_index = secrets.randbelow(pool_size)
+  random_value = secrets.randbits(256)
+  winner = validations[selected_index]
+  canonical_participants = build_canonical_participants(validations)
+  participants_hash = build_participants_hash(validations)
+
+  coupon_rows = fetch_supabase_table(
+    "coupons",
+    {
+      "select": "code,document_number,document_type,customer_code,customer_name,seller_code,seller_name",
+      "code": f"eq.{winner.get('code') or ''}",
+      "document_number": f"eq.{winner.get('document') or ''}",
+      "limit": "1",
+    },
+    range_limit=0,
+  )
+  coupon = coupon_rows[0] if coupon_rows else {}
+
+  draw_id = str(uuid.uuid4())
+  draw_payload = {
+    "id": draw_id,
+    "validation_id": winner.get("id"),
+    "prize_item": prize_item,
+    "code": winner.get("code"),
+    "cpf": winner.get("cpf"),
+    "document": winner.get("document"),
+    "document_type": coupon.get("document_type"),
+    "customer_code": coupon.get("customer_code"),
+    "customer_name": coupon.get("customer_name"),
+    "seller_code": coupon.get("seller_code"),
+    "seller_name": coupon.get("seller_name"),
+    "validated_at": winner.get("validated_at"),
+    "algorithm_version": DRAW_ALGORITHM_VERSION,
+    "pool_size": pool_size,
+    "random_value": str(random_value),
+    "selected_index": selected_index,
+    "participants_hash": participants_hash,
+  }
+
+  saved_draw = insert_supabase_record("draws", draw_payload)
+  try:
+    saved_audit = insert_supabase_record(
+      "draw_audits",
+      {
+        "draw_id": draw_id,
+        "algorithm_version": DRAW_ALGORITHM_VERSION,
+        "algorithm_updated_at": DRAW_ALGORITHM_UPDATED_AT,
+        "pool_size": pool_size,
+        "selected_index": selected_index,
+        "random_value": str(random_value),
+        "participants_hash": participants_hash,
+        "participants": canonical_participants,
+        "admin_user_id": user.get("id"),
+      },
+    )
+  except Exception:
+    delete_supabase_records("draws", f"id=eq.{draw_id}")
+    raise
+
+  return {
+    "success": True,
+    "algorithm_version": DRAW_ALGORITHM_VERSION,
+    "algorithm_updated_at": DRAW_ALGORITHM_UPDATED_AT,
+    "participants_hash": participants_hash,
+    "admin_user_id": user.get("id"),
+    "winner": {
+      **winner,
+      "document_type": coupon.get("document_type"),
+      "customer_code": coupon.get("customer_code"),
+      "customer_name": coupon.get("customer_name"),
+      "seller_code": coupon.get("seller_code"),
+      "seller_name": coupon.get("seller_name"),
+    },
+    "draw": saved_draw,
+    "audit": saved_audit,
   }
 
 

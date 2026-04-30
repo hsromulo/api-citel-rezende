@@ -28,16 +28,22 @@ interface DrawRecord extends Validation {
   selected_index?: number | null;
 }
 
-const DRAW_ALGORITHM_VERSION = 'crypto-random-v1';
-const DRAW_ALGORITHM_SOURCE = `const participantes = validacoesAutenticadas;
-const totalDeCuponsValidados = participantes.length;
-const randomValues = new Uint32Array(1);
+const SERVER_DRAW_ALGORITHM_VERSION = 'server-secrets-randbelow-v1';
+const DRAW_ALGORITHM_UPDATED_AT = '30/04/2026';
+const DRAW_ALGORITHM_VERSION = SERVER_DRAW_ALGORITHM_VERSION;
+const API_BASE_URL =
+  import.meta.env.VITE_SYNC_API_URL || 'https://api-citel-rezende-2.onrender.com';
+const DRAW_ALGORITHM_SOURCE = `participantes = validacoes_autenticadas_ordenadas_por_validated_at_e_id
+hashDosParticipantes = sha256(JSON.stringify(participantes_canonicos))
+totalDeCuponsValidados = participantes.length
 
-window.crypto.getRandomValues(randomValues);
+indiceSorteado = secrets.randbelow(totalDeCuponsValidados)
+numeroAleatorioBruto = secrets.randbits(256)
 
-const numeroAleatorio = randomValues[0];
-const posicaoVencedora = numeroAleatorio % totalDeCuponsValidados;
-const cupomSorteado = participantes[posicaoVencedora];`;
+cupomSorteado = participantes[indiceSorteado]
+
+salvar_resultado_publico_em_draws(cupomSorteado)
+salvar_auditoria_restrita_em_draw_audits(hashDosParticipantes, participantes_canonicos)`;
 const LOCAL_DRAW_HISTORY_KEY = 'selecao-herois-local-draw-history';
 const LOCAL_PRIZE_ITEMS_KEY = 'selecao-herois-prize-items';
 
@@ -308,44 +314,6 @@ export default function CouponList({ onBack }: CouponListProps) {
     }
   };
 
-  const saveLocalDraw = (draw: any, winner: Validation) => {
-    const localDraw = {
-      ...draw,
-      id: `local-${Date.now()}`,
-      drawn_at: new Date().toISOString(),
-    };
-
-    const saved = window.localStorage.getItem(LOCAL_DRAW_HISTORY_KEY);
-    const current = saved ? JSON.parse(saved) : [];
-    const next = [localDraw, ...current];
-    window.localStorage.setItem(LOCAL_DRAW_HISTORY_KEY, JSON.stringify(next));
-
-    setDrawHistory((history) => [
-      {
-        ...winner,
-        draw_id: localDraw.id,
-        drawn_at: localDraw.drawn_at,
-        prize_item: localDraw.prize_item,
-        algorithm_version: localDraw.algorithm_version,
-        pool_size: localDraw.pool_size,
-        selected_index: localDraw.selected_index,
-      },
-      ...history,
-    ]);
-  };
-
-  const chooseRandomValidation = () => {
-    const randomValues = new Uint32Array(1);
-    window.crypto.getRandomValues(randomValues);
-    const selectedIndex = randomValues[0] % data.length;
-
-    return {
-      winner: data[selectedIndex],
-      randomValue: randomValues[0],
-      selectedIndex,
-    };
-  };
-
   const handleDraw = async () => {
     setDrawMessage('');
 
@@ -361,55 +329,51 @@ export default function CouponList({ onBack }: CouponListProps) {
       return;
     }
 
-    const { winner, randomValue, selectedIndex } = chooseRandomValidation();
-    setSelectedWinner(winner);
-    setSelectedPrizeItem(cleanPrizeItem);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
 
-    const drawPayload = {
-      validation_id: winner.id,
-      prize_item: cleanPrizeItem,
-      code: winner.code,
-      cpf: winner.cpf,
-      document: winner.document,
-      document_type: winner.document_type,
-      customer_code: winner.customer_code,
-      customer_name: winner.customer_name,
-      seller_code: winner.seller_code,
-      seller_name: winner.seller_name,
-      validated_at: winner.validated_at,
-      algorithm_version: DRAW_ALGORITHM_VERSION,
-      pool_size: data.length,
-      random_value: String(randomValue),
-      selected_index: selectedIndex,
-    };
+    if (!accessToken) {
+      setDrawMessage('Sessão administrativa expirada. Faça login novamente.');
+      return;
+    }
 
-    const { data: savedDraw, error } = await supabase
-      .from('draws')
-      .insert([drawPayload])
-      .select()
-      .single();
+    const response = await fetch(`${API_BASE_URL}/draw`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prize_item: cleanPrizeItem }),
+    });
 
-    if (error) {
-      console.warn('Nao foi possivel salvar sorteio:', error);
-      saveLocalDraw(drawPayload, winner);
+    const drawResult = await response.json();
+
+    if (!response.ok || !drawResult.success) {
       setDrawMessage(
-        isMissingDrawTableError(error)
-          ? 'Sorteio exibido na janela local desta máquina. Para salvar definitivo no Supabase, execute o SQL create_draws_table.sql.'
-          : `Sorteio exibido na janela local, mas o Supabase retornou erro: ${error.message}`
+        drawResult.detail ||
+          drawResult.message ||
+          'Não foi possível realizar o sorteio no servidor.'
       );
       return;
     }
 
-    setDrawMessage('Sorteio salvo no histórico com sucesso.');
+    const winner = drawResult.winner as Validation;
+    const savedDraw = drawResult.draw;
+    setSelectedWinner(winner);
+    setSelectedPrizeItem(cleanPrizeItem);
+    setDrawMessage(
+      `Sorteio salvo com auditoria no servidor. Algoritmo atualizado em ${DRAW_ALGORITHM_UPDATED_AT}. Hash dos participantes: ${drawResult.participants_hash}`
+    );
     setDrawHistory((current) => [
       {
         ...winner,
         draw_id: savedDraw?.id ?? `${winner.id}-${Date.now()}`,
         drawn_at: savedDraw?.drawn_at ?? new Date().toISOString(),
         prize_item: savedDraw?.prize_item ?? cleanPrizeItem,
-        algorithm_version: savedDraw?.algorithm_version ?? DRAW_ALGORITHM_VERSION,
+        algorithm_version:
+          savedDraw?.algorithm_version ?? SERVER_DRAW_ALGORITHM_VERSION,
         pool_size: savedDraw?.pool_size ?? data.length,
-        selected_index: savedDraw?.selected_index ?? selectedIndex,
+        selected_index: savedDraw?.selected_index ?? 0,
       },
       ...current,
     ]);
@@ -648,33 +612,42 @@ export default function CouponList({ onBack }: CouponListProps) {
           {showAlgorithm && (
             <section className="algorithm-card">
               <span className="draw-kicker">Auditoria</span>
-              <h3>Algoritmo do sorteio</h3>
+              <h3>Algoritmo oficial do sorteio</h3>
               <ol>
                 <li>
-                  O sistema carrega todos os cupons autenticados da tabela
+                  O sorteio é executado no backend da API, fora do navegador do
+                  administrador, usando somente cupons autenticados na tabela
                   <strong> validations</strong>.
                 </li>
                 <li>
-                  Cada cupom validado vira uma chance no sorteio. As chances
-                  são iguais para todos os cupons: 1 cupom validado = 1 chance.
+                  A lista de participantes é ordenada de forma determinística por
+                  data de validação e identificador interno, antes da escolha do
+                  vencedor.
                 </li>
                 <li>
-                  No clique em <strong>Realizar sorteio</strong>, o navegador
-                  gera um número aleatório criptográfico com
-                  <strong> window.crypto.getRandomValues</strong>.
+                  Antes do sorteio, o servidor calcula um hash SHA-256 da lista
+                  canônica de participantes. Esse hash é gravado junto com o
+                  resultado para auditoria posterior.
                 </li>
                 <li>
-                  A posição vencedora é calculada por:
-                  <code>numeroAleatorio % totalDeCuponsValidados</code>.
+                  O índice vencedor é gerado com <strong>secrets.randbelow</strong>,
+                  uma fonte criptograficamente segura do servidor que evita viés
+                  de módulo.
                 </li>
                 <li>
-                  O resultado é salvo na tabela <strong>draws</strong> com a
-                  versão do algoritmo, total de participantes e posição
-                  sorteada.
+                  O sistema salva o resultado público na tabela <strong>draws</strong>
+                  e salva a trilha completa na tabela restrita
+                  <strong> draw_audits</strong>, incluindo número aleatório bruto,
+                  hash da lista, participantes, usuário administrador, versão e
+                  data da última alteração do algoritmo.
                 </li>
               </ol>
               <p>
                 Versão atual do algoritmo: <strong>{DRAW_ALGORITHM_VERSION}</strong>
+              </p>
+              <p>
+                Última alteração do algoritmo:{' '}
+                <strong>{DRAW_ALGORITHM_UPDATED_AT}</strong>
               </p>
               <pre className="algorithm-source">
                 <code>{DRAW_ALGORITHM_SOURCE}</code>
