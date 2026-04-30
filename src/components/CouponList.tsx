@@ -29,22 +29,27 @@ interface DrawRecord extends Validation {
 }
 
 const SERVER_DRAW_ALGORITHM_VERSION = 'server-rejection-sampling-256-v1';
-const DRAW_ALGORITHM_UPDATED_AT = '30/04/2026';
+const DRAW_ALGORITHM_LANGUAGE = 'Python 3 / FastAPI';
+const DRAW_ALGORITHM_UPDATED_AT = '30/04/2026 às 09:18';
 const DRAW_ALGORITHM_VERSION = SERVER_DRAW_ALGORITHM_VERSION;
 const API_BASE_URL =
   import.meta.env.VITE_SYNC_API_URL || 'https://api-citel-rezende-2.onrender.com';
-const DRAW_ALGORITHM_SOURCE = `participantes = validacoes_autenticadas_ordenadas_por_validated_at_e_id
+const DRAW_ALGORITHM_SOURCE = `participantes = consulta_unica_validations_ordenada_por_validated_at_e_id
+participantes_canonicos = participantes.map(({ id, code, cpf, document, validated_at }) => ({
+  id, code, cpf, document, validated_at
+}))
+
 hashDosParticipantes = sha256(JSON.stringify(participantes_canonicos))
 totalDeCuponsValidados = participantes.length
 
-espacoAleatorio = 2 ** 256
-limiteAceito = espacoAleatorio - (espacoAleatorio % totalDeCuponsValidados)
+espacoAleatorio = 1n << 256n
+limiteAceito = espacoAleatorio - (espacoAleatorio % BigInt(totalDeCuponsValidados))
 
 repita:
   numeroAleatorioBruto = secrets.randbits(256)
-ate numeroAleatorioBruto < limiteAceito
+ate BigInt(numeroAleatorioBruto) < limiteAceito
 
-indiceSorteado = numeroAleatorioBruto % totalDeCuponsValidados
+indiceSorteado = Number(BigInt(numeroAleatorioBruto) % BigInt(totalDeCuponsValidados))
 
 cupomSorteado = participantes[indiceSorteado]
 
@@ -626,14 +631,16 @@ export default function CouponList({ onBack }: CouponListProps) {
                   <strong> validations</strong>.
                 </li>
                 <li>
-                  A lista de participantes é ordenada de forma determinística por
-                  data de validação e identificador interno, antes da escolha do
-                  vencedor.
+                  A lista de participantes é obtida em uma única consulta e
+                  congelada em memória durante a execução do sorteio. Ela é
+                  ordenada de forma determinística por data de validação e
+                  identificador interno, antes da escolha do vencedor.
                 </li>
                 <li>
                   Antes do sorteio, o servidor calcula um hash SHA-256 da lista
-                  canônica de participantes. Esse hash é gravado junto com o
-                  resultado para auditoria posterior.
+                  canônica de participantes. A forma canônica usa somente campos
+                  fixos: id, cupom, CPF, documento e data de validação. Esse hash
+                  é gravado junto com o resultado para auditoria posterior.
                 </li>
                 <li>
                   O servidor gera um número aleatório bruto de 256 bits com
@@ -646,12 +653,16 @@ export default function CouponList({ onBack }: CouponListProps) {
                   O sistema salva o resultado público na tabela <strong>draws</strong>
                   e salva a trilha completa na tabela restrita
                   <strong> draw_audits</strong>, incluindo número aleatório bruto,
-                  hash da lista, participantes, usuário administrador, versão e
-                  data da última alteração do algoritmo.
+                  índice sorteado, hash da lista, participantes, usuário
+                  administrador, versão e data da última alteração do algoritmo.
                 </li>
               </ol>
               <p>
                 Versão atual do algoritmo: <strong>{DRAW_ALGORITHM_VERSION}</strong>
+              </p>
+              <p>
+                Linguagem/ambiente do código:{' '}
+                <strong>{DRAW_ALGORITHM_LANGUAGE}</strong>
               </p>
               <p>
                 Última alteração do algoritmo:{' '}
