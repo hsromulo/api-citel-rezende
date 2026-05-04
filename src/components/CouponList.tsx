@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { formatCPF, supabase } from '../services/supabaseService';
+import * as XLSX from 'xlsx';
 import './CouponList.css';
 
 interface CouponListProps {
@@ -21,12 +22,19 @@ interface Validation {
 
 interface DrawRecord extends Validation {
   draw_id: string;
+  validation_id?: string | null;
   drawn_at: string;
   prize_item?: string | null;
   algorithm_version?: string | null;
+  algorithm_updated_at?: string | null;
   pool_size?: number | null;
   selected_index?: number | null;
   random_value?: string | null;
+  participants_hash?: string | null;
+  commit_hash?: string | null;
+  admin_user_id?: string | null;
+  admin_user_email?: string | null;
+  audit_created_at?: string | null;
 }
 
 interface DrawAuditSummary {
@@ -72,6 +80,24 @@ const isMissingDrawTableError = (error: { code?: string; message?: string }) =>
   error.code === '42P01' ||
   String(error.message || '').toLowerCase().includes('public.draws') ||
   String(error.message || '').toLowerCase().includes('schema cache');
+
+const downloadWorkbook = (
+  fileName: string,
+  sheets: Array<{
+    name: string;
+    header: string[];
+    rows: Array<Array<string | number>>;
+  }>
+) => {
+  const workbook = XLSX.utils.book_new();
+
+  sheets.forEach((sheet) => {
+    const worksheet = XLSX.utils.aoa_to_sheet([sheet.header, ...sheet.rows]);
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name);
+  });
+
+  XLSX.writeFile(workbook, fileName);
+};
 
 const loadPrizeItems = () => {
   try {
@@ -260,6 +286,20 @@ export default function CouponList({ onBack }: CouponListProps) {
       return;
     }
 
+    const { data: audits, error: auditError } = await supabase
+      .from('draw_audits')
+      .select(
+        'draw_id, algorithm_version, algorithm_updated_at, commit_hash, pool_size, selected_index, random_value, participants_hash, admin_user_id, admin_user_email, created_at'
+      );
+
+    if (auditError) {
+      console.warn('Nao foi possivel buscar auditoria dos sorteios:', auditError);
+    }
+
+    const auditMap = new Map(
+      (audits || []).map((audit) => [String(audit.draw_id), audit])
+    );
+
     const validationMap = new Map(
       validations.map((item) => [`${item.code}:${item.document}:${item.cpf}`, item])
     );
@@ -269,6 +309,7 @@ export default function CouponList({ onBack }: CouponListProps) {
         const validation = validationMap.get(
           `${draw.code}:${draw.document}:${draw.cpf}`
         );
+        const audit = auditMap.get(String(draw.id));
 
         return {
           ...(validation || {
@@ -284,12 +325,19 @@ export default function CouponList({ onBack }: CouponListProps) {
             document_type: draw.document_type,
           }),
           draw_id: draw.id,
+          validation_id: draw.validation_id,
           drawn_at: draw.drawn_at,
           prize_item: draw.prize_item,
-          algorithm_version: draw.algorithm_version,
-          pool_size: draw.pool_size,
-          selected_index: draw.selected_index,
-          random_value: draw.random_value,
+          algorithm_version: draw.algorithm_version ?? audit?.algorithm_version,
+          algorithm_updated_at: audit?.algorithm_updated_at,
+          pool_size: draw.pool_size ?? audit?.pool_size,
+          selected_index: draw.selected_index ?? audit?.selected_index,
+          random_value: draw.random_value ?? audit?.random_value,
+          participants_hash: draw.participants_hash ?? audit?.participants_hash,
+          commit_hash: audit?.commit_hash,
+          admin_user_id: audit?.admin_user_id,
+          admin_user_email: audit?.admin_user_email,
+          audit_created_at: audit?.created_at,
         };
       })
     );
@@ -316,17 +364,24 @@ export default function CouponList({ onBack }: CouponListProps) {
           customer_name: draw.customer_name,
           seller_code: draw.seller_code,
           seller_name: draw.seller_name,
-          document_type: draw.document_type,
-        }),
-        draw_id: draw.id,
-        drawn_at: draw.drawn_at,
-        prize_item: draw.prize_item,
-        algorithm_version: draw.algorithm_version,
-        pool_size: draw.pool_size,
-        selected_index: draw.selected_index,
-        random_value: draw.random_value,
-      };
-    });
+        document_type: draw.document_type,
+      }),
+      draw_id: draw.id,
+      validation_id: draw.validation_id,
+      drawn_at: draw.drawn_at,
+      prize_item: draw.prize_item,
+      algorithm_version: draw.algorithm_version,
+      algorithm_updated_at: draw.algorithm_updated_at,
+      pool_size: draw.pool_size,
+      selected_index: draw.selected_index,
+      random_value: draw.random_value,
+      participants_hash: draw.participants_hash,
+      commit_hash: draw.commit_hash,
+      admin_user_id: draw.admin_user_id,
+      admin_user_email: draw.admin_user_email,
+      audit_created_at: draw.audit_created_at,
+    };
+  });
   };
 
   const loadLocalDrawHistory = (validations: Validation[]) => {
@@ -408,19 +463,28 @@ export default function CouponList({ onBack }: CouponListProps) {
       {
         ...winner,
         draw_id: savedDraw?.id ?? `${winner.id}-${Date.now()}`,
+        validation_id: savedDraw?.validation_id ?? winner.id,
         drawn_at: savedDraw?.drawn_at ?? new Date().toISOString(),
         prize_item: savedDraw?.prize_item ?? cleanPrizeItem,
         algorithm_version:
           savedDraw?.algorithm_version ?? SERVER_DRAW_ALGORITHM_VERSION,
+        algorithm_updated_at: drawResult.algorithm_updated_at ?? null,
         pool_size: poolSize,
         selected_index: selectedIndex,
         random_value: randomValue,
+        participants_hash:
+          savedDraw?.participants_hash ?? drawResult.participants_hash ?? null,
+        commit_hash: rawCommitHash,
+        admin_user_id: drawResult.admin_user_id ?? null,
+        admin_user_email:
+          drawResult.admin_user_email || sessionData.session?.user?.email || null,
+        audit_created_at: drawResult.audit?.created_at ?? null,
       },
       ...current,
     ]);
   };
 
-  const exportToExcel = () => {
+  const buildValidationExport = () => {
     const header = [
       'Cupom',
       'CPF',
@@ -445,34 +509,15 @@ export default function CouponList({ onBack }: CouponListProps) {
         : '',
     ]);
 
-    const escapeCsvCell = (value: string) => {
-      const text = String(value ?? '');
-      return `"${text.replace(/"/g, '""')}"`;
-    };
-
-    const csvContent = [
-      'sep=;',
-      header.map(escapeCsvCell).join(';'),
-      ...rows.map((row) => row.map(escapeCsvCell).join(';')),
-    ].join('\n');
-
-    const blob = new Blob(['\uFEFF' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = 'validacoes_rezende.csv';
-    link.click();
-
-    URL.revokeObjectURL(url);
+    return { header, rows };
   };
 
-  const exportDrawsToExcel = () => {
+  const buildDrawExport = () => {
     const header = [
+      'ID do sorteio',
+      'ID da validação',
       'Sorteado em',
+      'Auditoria gravada em',
       'Item sorteado',
       'Cupom',
       'CPF',
@@ -482,12 +527,24 @@ export default function CouponList({ onBack }: CouponListProps) {
       'Tipo',
       'Vendedor',
       'Algoritmo',
-      'Posição sorteada',
-      'Total de cupons',
+      'Algoritmo atualizado em',
+      'Total de participantes',
+      'Índice técnico (0-based)',
+      'Posição na lista (1-based)',
+      'Número aleatório bruto',
+      'Hash dos participantes',
+      'Commit do backend',
+      'Usuário executor ID',
+      'Usuário executor e-mail',
     ];
 
     const rows = drawHistory.map((item) => [
+      item.draw_id || '',
+      item.validation_id || item.id || '',
       item.drawn_at ? new Date(item.drawn_at).toLocaleString('pt-BR') : '',
+      item.audit_created_at
+        ? new Date(item.audit_created_at).toLocaleString('pt-BR')
+        : '',
       item.prize_item || '',
       item.code || '',
       formatCPF(item.cpf || ''),
@@ -497,33 +554,41 @@ export default function CouponList({ onBack }: CouponListProps) {
       item.document_type || '',
       [item.seller_code, item.seller_name].filter(Boolean).join(' - '),
       item.algorithm_version || DRAW_ALGORITHM_VERSION,
-      typeof item.selected_index === 'number' ? String(item.selected_index + 1) : '',
+      item.algorithm_updated_at || DRAW_ALGORITHM_UPDATED_AT,
       typeof item.pool_size === 'number' ? String(item.pool_size) : '',
+      typeof item.selected_index === 'number' ? String(item.selected_index) : '',
+      typeof item.selected_index === 'number' ? String(item.selected_index + 1) : '',
+      item.random_value || '',
+      item.participants_hash || '',
+      item.commit_hash || '',
+      item.admin_user_id || '',
+      item.admin_user_email || '',
     ]);
 
-    const escapeCsvCell = (value: string) => {
-      const text = String(value ?? '');
-      return `"${text.replace(/"/g, '""')}"`;
-    };
+    return { header, rows };
+  };
 
-    const csvContent = [
-      'sep=;',
-      header.map(escapeCsvCell).join(';'),
-      ...rows.map((row) => row.map(escapeCsvCell).join(';')),
-    ].join('\n');
+  const exportToExcel = () => {
+    const validations = buildValidationExport();
+    downloadWorkbook('validacoes_rezende.xlsx', [
+      { name: 'Validações', header: validations.header, rows: validations.rows },
+    ]);
+  };
 
-    const blob = new Blob(['\uFEFF' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
-    });
+  const exportDrawsToExcel = () => {
+    const draws = buildDrawExport();
+    downloadWorkbook('sorteados_rezende.xlsx', [
+      { name: 'Sorteados', header: draws.header, rows: draws.rows },
+    ]);
+  };
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = 'sorteados_rezende.csv';
-    link.click();
-
-    URL.revokeObjectURL(url);
+  const exportAllToExcel = () => {
+    const validations = buildValidationExport();
+    const draws = buildDrawExport();
+    downloadWorkbook('auditoria_promocao_rezende.xlsx', [
+      { name: 'Validações', header: validations.header, rows: validations.rows },
+      { name: 'Sorteados', header: draws.header, rows: draws.rows },
+    ]);
   };
 
   return (
@@ -554,6 +619,13 @@ export default function CouponList({ onBack }: CouponListProps) {
             disabled={drawHistory.length === 0}
           >
             Exportar sorteados
+          </button>
+
+          <button
+            className="btn btn-primary btn-export"
+            onClick={exportAllToExcel}
+          >
+            Exportar tudo Excel
           </button>
         </div>
       </div>
