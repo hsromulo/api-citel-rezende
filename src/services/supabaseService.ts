@@ -14,6 +14,8 @@ export type CustomerCoupon = {
   id: string;
   code: string;
   cpf: string;
+  companyId?: string | null;
+  companyName?: string | null;
   documentNumber: string;
   documentType?: string | null;
   customerCode?: string | null;
@@ -102,6 +104,8 @@ const buildMockCoupons = (cpf: string): CustomerCoupon[] => {
       id: `${cpf}-1`,
       code: `HEROI-${suffix}-01`,
       cpf,
+      companyId: 'rezende',
+      companyName: 'Rezende',
       documentNumber: `DOC-${suffix}-01`,
       documentType: 'TESTE',
       customerCode: null,
@@ -129,6 +133,8 @@ const buildMockCoupons = (cpf: string): CustomerCoupon[] => {
       id: `${cpf}-2`,
       code: `HEROI-${suffix}-02`,
       cpf,
+      companyId: 'rezende',
+      companyName: 'Rezende',
       documentNumber: `DOC-${suffix}-02`,
       documentType: 'TESTE',
       customerCode: null,
@@ -156,6 +162,8 @@ const buildMockCoupons = (cpf: string): CustomerCoupon[] => {
       id: `${cpf}-3`,
       code: `HEROI-${suffix}-03`,
       cpf,
+      companyId: 'rezende',
+      companyName: 'Rezende',
       documentNumber: `DOC-${suffix}-03`,
       documentType: 'TESTE',
       customerCode: null,
@@ -183,6 +191,8 @@ const buildMockCoupons = (cpf: string): CustomerCoupon[] => {
       id: `${cpf}-4`,
       code: `HEROI-${suffix}-04`,
       cpf,
+      companyId: 'rezende',
+      companyName: 'Rezende',
       documentNumber: `DOC-${suffix}-04`,
       documentType: 'TESTE',
       customerCode: null,
@@ -210,6 +220,8 @@ const buildMockCoupons = (cpf: string): CustomerCoupon[] => {
       id: `${cpf}-5`,
       code: `HEROI-${suffix}-05`,
       cpf,
+      companyId: 'rezende',
+      companyName: 'Rezende',
       documentNumber: `DOC-${suffix}-05`,
       documentType: 'TESTE',
       customerCode: null,
@@ -247,6 +259,8 @@ const buildSyncedCoupons = (cpf: string, couponCount: number): CustomerCoupon[] 
       id: `${cpf}-${couponNumber}`,
       code: `HEROI-${suffix}-${couponNumber}`,
       cpf,
+      companyId: 'rezende',
+      companyName: 'Rezende',
       documentNumber: `AUTCOM-${suffix}-${couponNumber}`,
       documentType: 'AUTCOM',
       customerCode: null,
@@ -622,6 +636,8 @@ export const getCouponsByCpf = async (cpf: string): Promise<CustomerCouponLookup
       id: String(item.id ?? ''),
       code: String(item.code ?? ''),
       cpf: String(item.cpf ?? cleanCpf),
+      companyId: item.company_id ?? 'rezende',
+      companyName: item.company_name ?? 'Rezende',
       documentNumber: String(item.document_number ?? item.document ?? ''),
       documentType: item.document_type ?? null,
       customerCode: item.customer_code ?? null,

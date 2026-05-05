@@ -60,6 +60,9 @@ const getDocumentReference = (coupon: CustomerCoupon) =>
 const getSellerLabel = (coupon: CustomerCoupon) =>
   [coupon.sellerCode, coupon.sellerName].filter(Boolean).join(' - ') || '-';
 
+const getCompanyLabel = (coupon: CustomerCoupon) =>
+  coupon.companyName || (coupon.companyId === 'palmeira' ? 'Palmeira Tintas' : 'Rezende');
+
 const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
   cpf,
   customerName: customerNameFromLookup = '',
@@ -84,6 +87,7 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
     coupons.find((coupon) => coupon.customerName)?.customerName ||
     customerNameFromLookup;
   const hasNoCoupons = coupons.length === 0;
+  const drawnCouponsCount = coupons.filter((coupon) => coupon.isDrawn).length;
 
   useEffect(() => {
     if (forceSelectAllSignal > 0 && availableCoupons.length > 0) {
@@ -115,6 +119,14 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
   const handleValidate = () => {
     if (selectedCoupons.length === 0) {
       setFormError('Escolha pelo menos um cupom disponível para autenticar.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Após validar, ${selectedCoupons.length} cupom(ns) entrarão no sorteio. Deseja continuar?`
+    );
+
+    if (!confirmed) {
       return;
     }
 
@@ -150,6 +162,10 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
       </div>
 
       <dl className="customer-receipt-details">
+        <div>
+          <dt>Empresa</dt>
+          <dd>{getCompanyLabel(coupon)}</dd>
+        </div>
         <div>
           <dt>Referente ao documento</dt>
           <dd>{getDocumentReference(coupon)}</dd>
@@ -269,6 +285,11 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
           <div className="customer-draw-warning">
             <strong>Atenção:</strong> somente cupons validados entram no sorteio.
             Selecione e autentique seus cupons pendentes para participar.
+          </div>
+          <div className="customer-status-summary">
+            <span className="pending">{availableCoupons.length} pendente(s)</span>
+            <span className="validated">{validatedCoupons.length} validado(s)</span>
+            <span className="drawn">{drawnCouponsCount} sorteado(s)</span>
           </div>
         </div>
 
@@ -394,7 +415,7 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
                     >
                       {loading
                         ? 'Autenticando...'
-                        : 'Autenticar cupons selecionados'}
+                        : 'Validar e participar do sorteio'}
                     </button>
                   </div>
                 </>
@@ -449,6 +470,11 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
                         >
                           {coupon.isDrawn ? 'Cupom sorteado' : 'Cupom validado'}
                         </div>
+                        {!coupon.isDrawn && (
+                          <div className="customer-participating-alert">
+                            Este cupom já está participando do sorteio.
+                          </div>
+                        )}
                         <div className="customer-coupon-card-header">
                           <div>
                             <span className="customer-coupon-label">Cupom</span>
@@ -494,6 +520,10 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
             <span>
               <span className="customer-stat-label">Total de cupons</span>
               <strong className="customer-stat-value">{coupons.length}</strong>
+              <small className="customer-total-breakdown">
+                {availableCoupons.length} pendente(s) | {validatedCoupons.length}{' '}
+                validado(s) | {drawnCouponsCount} sorteado(s)
+              </small>
             </span>
             {renderWindowToggle('total')}
           </button>

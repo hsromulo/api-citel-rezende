@@ -335,8 +335,8 @@ function App() {
       setFeedbackModal({
         title:
           successfulCoupons.length > 1
-            ? 'Cupons verificados com sucesso'
-            : 'Cupom verificado com sucesso',
+            ? 'Cupons validados e participando do sorteio'
+            : 'Cupom validado e participando do sorteio',
         message:
           remainingCoupons.length > 0
             ? `Você autenticou ${successfulCoupons.length} cupom(ns) e ainda restam ${remainingCoupons.length}. Quer validar todos os demais agora?`
@@ -357,7 +357,7 @@ function App() {
       setFeedbackModal({
         title: 'Verificação parcial concluída',
         message:
-          `${successfulCoupons.length} cupom(ns) foram autenticados com sucesso. ` +
+          `${successfulCoupons.length} cupom(ns) foram validados e ja estao participando do sorteio. ` +
           `${failedCoupons.length} não puderam ser autenticados. Primeiro motivo: ` +
           `${failedCoupons[0].result.message || 'erro inesperado.'} ` +
           (remainingCoupons.length > 0
