@@ -591,8 +591,6 @@ export default function CouponList({ onBack }: CouponListProps) {
 
         <div>
           <h2>Lista de Validações</h2>
-          <p>{data.length} cupom(ns) autenticado(s)</p>
-          {lastUpdatedAt && <p>Atualizado às {lastUpdatedAt}</p>}
           <div className="admin-summary-pills">
             <span>Cupons validados: {data.length}</span>
             <span>Sorteios realizados: {drawHistory.length}</span>
