@@ -913,47 +913,53 @@ export default function CouponList({ onBack }: CouponListProps) {
 
           {listMessage && <p className="draw-message">{listMessage}</p>}
 
-          <div className="validation-table-wrap">
-            <table className="validation-table">
-              <thead>
-                <tr>
-                  <th>Cupom</th>
-                  <th>CPF</th>
-                  <th>Cliente</th>
-                  <th>Nome</th>
-                  <th>Documento</th>
-                  <th>Vendedor</th>
-                  <th>Data</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {data.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.code}</td>
-                    <td>{item.cpf ? formatCPF(item.cpf) : '-'}</td>
-                    <td>{item.customer_code || '-'}</td>
-                    <td>{item.customer_name || '-'}</td>
-                    <td>
-                      {[item.document, item.document_type]
-                        .filter(Boolean)
-                        .join('-') || '-'}
-                    </td>
-                    <td>
-                      {[item.seller_code, item.seller_name]
-                        .filter(Boolean)
-                        .join(' - ') || '-'}
-                    </td>
-                    <td>
-                      {item.validated_at
-                        ? new Date(item.validated_at).toLocaleString('pt-BR')
-                        : '-'}
-                    </td>
+          <section className="validated-coupons-window">
+            <h3>Janela de cupons validados</h3>
+            <p>
+              Cupons autenticados que participam do próximo sorteio oficial.
+            </p>
+            <div className="validation-table-wrap">
+              <table className="validation-table">
+                <thead>
+                  <tr>
+                    <th>Cupom</th>
+                    <th>CPF</th>
+                    <th>Cliente</th>
+                    <th>Nome</th>
+                    <th>Documento</th>
+                    <th>Vendedor</th>
+                    <th>Data</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+
+                <tbody>
+                  {data.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.code}</td>
+                      <td>{item.cpf ? formatCPF(item.cpf) : '-'}</td>
+                      <td>{item.customer_code || '-'}</td>
+                      <td>{item.customer_name || '-'}</td>
+                      <td>
+                        {[item.document, item.document_type]
+                          .filter(Boolean)
+                          .join('-') || '-'}
+                      </td>
+                      <td>
+                        {[item.seller_code, item.seller_name]
+                          .filter(Boolean)
+                          .join(' - ') || '-'}
+                      </td>
+                      <td>
+                        {item.validated_at
+                          ? new Date(item.validated_at).toLocaleString('pt-BR')
+                          : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </>
       )}
     </div>
