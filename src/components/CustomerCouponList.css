@@ -602,9 +602,16 @@
 }
 
 .customer-receipt-details .customer-receipt-prize dd {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.16);
+  border: 1px solid rgba(250, 204, 21, 0.34);
   color: #b45309;
   font-size: 0.95rem;
   font-weight: 900;
+  padding: 0.42rem 0.7rem;
 }
 
 .customer-receipt-footer {
