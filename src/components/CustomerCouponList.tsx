@@ -315,7 +315,7 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
                 <div className="customer-selection-actions">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary customer-select-all-button"
                     onClick={handleSelectAll}
                     disabled={loading}
                   >
@@ -324,7 +324,7 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
 
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary customer-clear-selection-button"
                     onClick={handleClearSelection}
                     disabled={loading || selectedCoupons.length === 0}
                   >

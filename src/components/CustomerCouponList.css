@@ -338,6 +338,24 @@
   padding: 0.75rem 1rem;
 }
 
+.customer-selection-actions .customer-select-all-button {
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(34, 197, 94, 0.36);
+  color: #22c55e;
+}
+
+.customer-selection-actions .customer-clear-selection-button {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.customer-selection-actions .customer-clear-selection-button:disabled {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-border);
+  color: var(--color-muted);
+}
+
 .customer-coupon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
