@@ -582,15 +582,6 @@ export default function CouponList({ onBack }: CouponListProps) {
     ]);
   };
 
-  const exportAllToExcel = () => {
-    const validations = buildValidationExport();
-    const draws = buildDrawExport();
-    downloadWorkbook('auditoria_promocao_rezende.xlsx', [
-      { name: 'Validações', header: validations.header, rows: validations.rows },
-      { name: 'Sorteados', header: draws.header, rows: draws.rows },
-    ]);
-  };
-
   return (
     <div className="coupon-list-container">
       <div className="list-header">
@@ -619,13 +610,6 @@ export default function CouponList({ onBack }: CouponListProps) {
             disabled={drawHistory.length === 0}
           >
             Exportar sorteados
-          </button>
-
-          <button
-            className="btn btn-primary btn-export"
-            onClick={exportAllToExcel}
-          >
-            Exportar tudo Excel
           </button>
         </div>
       </div>
