@@ -222,8 +222,15 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
     </div>
   );
 
-  const renderTotalCoupon = (coupon: CustomerCoupon) => (
-    <article key={coupon.id} className="customer-summary-row">
+  const renderTotalCoupon = (coupon: CustomerCoupon) => {
+    const statusClass = coupon.isDrawn
+      ? 'drawn'
+      : coupon.isUsed
+        ? 'used'
+        : 'available';
+
+    return (
+      <article key={coupon.id} className={`customer-summary-row ${statusClass}`}>
       <div>
         <span className="customer-coupon-label">Cupom</span>
         <strong>{coupon.code}</strong>
@@ -231,7 +238,8 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
       </div>
       {renderStatusBadge(coupon)}
     </article>
-  );
+    );
+  };
 
   const getWindowClassName = (window: CouponWindow, extraClass: string) =>
     [

@@ -202,6 +202,29 @@
   border: 1px solid var(--color-border);
 }
 
+.customer-summary-row.available {
+  background: rgba(239, 68, 68, 0.09);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.customer-summary-row.available strong {
+  color: #f87171;
+}
+
+.customer-summary-row.used {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.customer-summary-row.drawn {
+  background: rgba(250, 204, 21, 0.12);
+  border-color: rgba(250, 204, 21, 0.4);
+}
+
+.customer-summary-row.drawn strong {
+  color: #facc15;
+}
+
 .customer-summary-row strong {
   display: block;
   color: var(--color-rezende-primary);
@@ -477,9 +500,9 @@
 }
 
 .customer-status-badge.available {
-  background: rgba(250, 204, 21, 0.14);
-  color: #facc15;
-  border: 1px solid rgba(250, 204, 21, 0.28);
+  background: rgba(239, 68, 68, 0.13);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .customer-status-badge.used {
