@@ -348,12 +348,13 @@
   position: relative;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   border-radius: 20px;
-  padding: 3.25rem 1.2rem 1.2rem;
+  padding: 1.2rem;
   border: 1px solid var(--color-border);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: hidden;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -375,7 +376,6 @@
 }
 
 .customer-coupon-card.drawn {
-  padding-top: 3.2rem;
   border-color: rgba(250, 204, 21, 0.72);
   background:
     linear-gradient(180deg, rgba(250, 204, 21, 0.18), rgba(34, 197, 94, 0.08) 34%, rgba(255, 255, 255, 0.02)),
@@ -388,18 +388,18 @@
 
 .customer-validated-ribbon {
   position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  max-width: calc(100% - 1.7rem);
+  top: 1.35rem;
+  right: -3.35rem;
+  width: 13.5rem;
+  transform: rotate(38deg);
   background: #22c55e;
   color: #061a12;
-  border-radius: 999px;
-  padding: 0.42rem 0.75rem;
+  padding: 0.36rem 0;
   text-align: center;
-  font-size: 0.68rem;
+  font-size: 0.58rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   box-shadow: 0 8px 20px rgba(34, 197, 94, 0.22);
   z-index: 2;
   white-space: nowrap;
@@ -412,17 +412,8 @@
 }
 
 .customer-validated-ribbon.drawn {
-  top: 0;
-  right: 0;
-  left: 0;
-  width: 100%;
-  transform: none;
-  border-radius: 20px 20px 0 0;
-  padding: 0.65rem 1rem;
   background: linear-gradient(90deg, #facc15, #fde047, #facc15);
   color: #061a12;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
   box-shadow: 0 8px 24px rgba(250, 204, 21, 0.24);
 }
 
@@ -446,6 +437,20 @@
 .customer-drawn-alert span {
   color: var(--color-muted);
   font-size: 0.9rem;
+}
+
+.customer-drawn-alert .customer-drawn-prize {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.18);
+  border: 1px solid rgba(250, 204, 21, 0.36);
+  color: #facc15;
+  font-size: 0.95rem;
+  font-weight: 900;
+  padding: 0.45rem 0.7rem;
+  overflow-wrap: anywhere;
 }
 
 .customer-stat-card .customer-coupon-card {

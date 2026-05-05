@@ -457,7 +457,9 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
                         {coupon.isDrawn && (
                           <div className="customer-drawn-alert">
                             <strong>Este cupom foi sorteado</strong>
-                            <span>Item sorteado: {coupon.prizeItem || 'Item não informado'}</span>
+                            <span className="customer-drawn-prize">
+                              Item sorteado: {coupon.prizeItem || 'Item não informado'}
+                            </span>
                             <span>
                               {coupon.drawnAt
                                 ? `Sorteado em ${new Date(
