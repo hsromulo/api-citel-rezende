@@ -195,7 +195,7 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
           <dd>{formatDate(coupon.expiryDate)}</dd>
         </div>
         {coupon.isDrawn && (
-          <div className="customer-receipt-details--wide">
+          <div className="customer-receipt-details--wide customer-receipt-prize">
             <dt>Item sorteado</dt>
             <dd>{coupon.prizeItem || 'Item não informado'}</dd>
           </div>
