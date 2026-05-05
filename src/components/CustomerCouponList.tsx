@@ -266,6 +266,10 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
               </>
             )}
           </p>
+          <div className="customer-draw-warning">
+            <strong>Atenção:</strong> somente cupons validados entram no sorteio.
+            Selecione e autentique seus cupons pendentes para participar.
+          </div>
         </div>
 
         <button

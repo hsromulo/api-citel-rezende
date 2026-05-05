@@ -53,6 +53,27 @@
   margin: 0 0.55rem;
 }
 
+.customer-draw-warning {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 1rem;
+  border: 1px solid rgba(250, 204, 21, 0.42);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(250, 204, 21, 0.08)),
+    rgba(250, 204, 21, 0.06);
+  color: #facc15;
+  font-size: 0.98rem;
+  font-weight: 900;
+  line-height: 1.45;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.12);
+}
+
+.customer-draw-warning strong {
+  color: #fde047;
+}
+
 .customer-back-button {
   width: auto;
   margin-top: 0;
