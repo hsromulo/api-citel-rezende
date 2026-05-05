@@ -344,6 +344,9 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
                           selectedCouponIds.includes(coupon.id) ? 'selected' : ''
                         }`}
                       >
+                        <div className="customer-validated-ribbon pending">
+                          Cupom não validado
+                        </div>
                         <label className="customer-select-row">
                           <input
                             type="checkbox"

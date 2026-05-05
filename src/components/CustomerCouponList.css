@@ -322,9 +322,10 @@
 }
 
 .customer-coupon-card {
+  position: relative;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   border-radius: 20px;
-  padding: 1.2rem;
+  padding: 3.25rem 1.2rem 1.2rem;
   border: 1px solid var(--color-border);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   display: flex;
@@ -347,8 +348,6 @@
 }
 
 .customer-coupon-card.used {
-  position: relative;
-  overflow: hidden;
   background: linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(255, 255, 255, 0.02));
 }
 
@@ -366,19 +365,27 @@
 
 .customer-validated-ribbon {
   position: absolute;
-  top: 16px;
-  right: -42px;
-  width: 160px;
-  transform: rotate(38deg);
+  top: 0.85rem;
+  right: 0.85rem;
+  max-width: calc(100% - 1.7rem);
   background: #22c55e;
   color: #061a12;
-  padding: 0.35rem 0;
+  border-radius: 999px;
+  padding: 0.42rem 0.75rem;
   text-align: center;
   font-size: 0.68rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   box-shadow: 0 8px 20px rgba(34, 197, 94, 0.22);
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.customer-validated-ribbon.pending {
+  background: #ef4444;
+  color: #fff7ed;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.24);
 }
 
 .customer-validated-ribbon.drawn {
