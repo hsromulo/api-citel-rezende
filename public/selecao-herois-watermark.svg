@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-label="Selecao dos Herois">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-label="Selecao dos Herois marca d'agua">
   <rect width="1200" height="760" fill="none"/>
-  <g fill="#f1cf00">
+  <g fill="#111111">
     <path d="M600 56 634 126 711 137 655 192 668 269 600 233 532 269 545 192 489 137 566 126Z"/>
     <path d="M426 98 449 146 502 154 464 191 473 243 426 218 379 243 388 191 350 154 403 146Z"/>
     <path d="M774 98 797 146 850 154 812 191 821 243 774 218 727 243 736 191 698 154 751 146Z"/>
     <path d="M266 138 286 179 331 186 299 218 306 263 266 242 226 263 233 218 201 186 246 179Z"/>
     <path d="M934 138 954 179 999 186 967 218 974 263 934 242 894 263 901 218 869 186 914 179Z"/>
   </g>
-  <g font-family="Arial Black, Impact, Arial, sans-serif" text-anchor="middle">
-    <text x="600" y="395" fill="#fffdf0" font-size="138" letter-spacing="36">SELEÇÃO</text>
-    <text x="600" y="505" fill="#fffdf0" font-size="76" letter-spacing="6">DOS</text>
-    <text x="600" y="705" fill="#f1cf00" font-size="230" letter-spacing="-8">HEROIS</text>
+  <g font-family="Arial Black, Impact, Arial, sans-serif" text-anchor="middle" fill="#111111">
+    <text x="600" y="395" font-size="138" letter-spacing="36">SELEÇÃO</text>
+    <text x="600" y="505" font-size="76" letter-spacing="6">DOS</text>
+    <text x="600" y="705" font-size="230" letter-spacing="-8">HEROIS</text>
   </g>
-  <path d="M748 497 832 502 778 551 715 548Z" fill="#f1cf00"/>
+  <path d="M748 497 832 502 778 551 715 548Z" fill="#111111"/>
 </svg>

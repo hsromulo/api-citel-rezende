@@ -437,7 +437,9 @@ function App() {
       <div className="app-container">
         <header className="header">
           <div className="header-content">
-            <span className="header-kicker">Verificação pública</span>
+            <div className="header-campaign-logo">
+              <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
+            </div>
             <h1>Validador de Sorteio</h1>
             <p>
               Recalcule a prova técnica de um sorteio usando hash, número
@@ -458,7 +460,9 @@ function App() {
       <div className="app-container">
         <header className="header">
           <div className="header-content">
-            <span className="header-kicker">Administrativo</span>
+            <div className="header-campaign-logo">
+              <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
+            </div>
             <h1>Validações e Sorteios</h1>
             <p>Consulte, exporte e sorteie os cupons autenticados da promoção.</p>
           </div>
@@ -493,15 +497,6 @@ function App() {
           <div className="header-campaign-logo">
             <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
           </div>
-          <div className="header-brand-row">
-            <div className="header-brand-logo">
-              <img src="/rezende-logo.svg" alt="Rezende Materiais para Construção" />
-            </div>
-            <div className="header-brand-logo">
-              <img src="/palmeira-logo.svg" alt="Palmeira Tintas" />
-            </div>
-          </div>
-          <span className="header-kicker">Promoção Copa de Prêmios</span>
           <p>
             Informe seu CPF, confirme a pergunta da campanha e autentique seus
             cupons com segurança.
