@@ -98,9 +98,9 @@ body {
 
 .header-campaign-logo img {
   display: block;
-  width: min(620px, 94vw);
+  width: min(720px, 92vw);
   height: auto;
-  max-height: 330px;
+  max-height: 380px;
   object-fit: contain;
   filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.32));
 }

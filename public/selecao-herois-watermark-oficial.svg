@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="Camada_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 637.04 414.78">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Camada_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-40 0 717.04 414.78">
   <!-- Generator: Adobe Illustrator 30.3.0, SVG Export Plug-In . SVG Version: 2.1.3 Build 182)  -->
   <defs>
     <style>
@@ -9,7 +9,7 @@
       }
 
       .st0, .st1 {
-        fill: #fff;
+        fill: #111111;
       }
     </style>
     <path id="path" d="M-13.48,400.66s247.4-19.96,329.87-19.96,329.87,19.96,329.87,19.96"/>
@@ -39,3 +39,4 @@
     <polygon class="st1" points="472.12 63.21 457.62 61.1 451.14 47.97 447.28 55.79 444.62 61.11 430.16 63.21 440.65 73.43 438.18 87.87 451.14 81.05 464.11 87.87 461.63 73.43 472.12 63.21"/>
   </g>
 </svg>
+

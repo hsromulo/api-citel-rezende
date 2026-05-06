@@ -122,14 +122,6 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
       return;
     }
 
-    const confirmed = window.confirm(
-      `Após validar, ${selectedCoupons.length} cupom(ns) entrarão no sorteio. Deseja continuar?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     setFormError('');
     onValidate(selectedCoupons);
   };
