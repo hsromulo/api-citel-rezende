@@ -653,8 +653,8 @@
   content: '';
   position: absolute;
   inset: 1.1rem;
-  background: url('/selecao-herois-watermark.svg') center / 78% auto no-repeat;
-  opacity: 0.055;
+  background: url('/selecao-herois-watermark-oficial.svg') center / 86% auto no-repeat;
+  opacity: 0.105;
   pointer-events: none;
 }
 

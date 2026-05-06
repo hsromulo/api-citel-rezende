@@ -438,7 +438,7 @@ function App() {
         <header className="header">
           <div className="header-content">
             <div className="header-campaign-logo">
-              <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
+              <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
             </div>
             <h1>Validador de Sorteio</h1>
             <p>
@@ -461,7 +461,7 @@ function App() {
         <header className="header">
           <div className="header-content">
             <div className="header-campaign-logo">
-              <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
+              <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
             </div>
             <h1>Validações e Sorteios</h1>
             <p>Consulte, exporte e sorteie os cupons autenticados da promoção.</p>
@@ -495,7 +495,7 @@ function App() {
       <header className="header">
         <div className="header-content">
           <div className="header-campaign-logo">
-            <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
+            <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
           </div>
           <p>
             Informe seu CPF, confirme a pergunta da campanha e autentique seus
