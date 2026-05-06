@@ -51,7 +51,7 @@
 }
 
 .result-card.success .result-icon {
-  background-color: rgba(34, 197, 94, 0.12);
+  background-color: rgba(0, 144, 69, 0.12);
 }
 
 .result-card.error .result-icon {
@@ -143,3 +143,4 @@
     align-items: flex-start;
   }
 }
+

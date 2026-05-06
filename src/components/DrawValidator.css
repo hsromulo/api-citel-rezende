@@ -52,7 +52,7 @@
 .draw-validator input:focus,
 .draw-validator textarea:focus {
   border-color: var(--color-rezende-secondary);
-  box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.16);
+  box-shadow: 0 0 0 4px rgba(241, 207, 0, 0.16);
   outline: none;
 }
 
@@ -84,8 +84,8 @@
 }
 
 .draw-validator__result--valid {
-  border-color: rgba(34, 197, 94, 0.45);
-  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(0, 144, 69, 0.45);
+  background: rgba(0, 144, 69, 0.08);
 }
 
 .draw-validator__result--invalid {
@@ -156,3 +156,4 @@
     width: 100%;
   }
 }
+

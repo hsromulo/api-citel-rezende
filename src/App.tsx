@@ -490,6 +490,9 @@ function App() {
     <div className="app-container">
       <header className="header">
         <div className="header-content">
+          <div className="header-campaign-logo">
+            <img src="/selecao-herois-logo.svg" alt="Seleção dos Heróis" />
+          </div>
           <div className="header-brand-row">
             <div className="header-brand-logo">
               <img src="/rezende-logo.svg" alt="Rezende Materiais para Construção" />
@@ -499,7 +502,6 @@ function App() {
             </div>
           </div>
           <span className="header-kicker">Promoção Copa de Prêmios</span>
-          <h1>Seleção dos Heróis</h1>
           <p>
             Informe seu CPF, confirme a pergunta da campanha e autentique seus
             cupons com segurança.

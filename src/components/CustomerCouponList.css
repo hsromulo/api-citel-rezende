@@ -29,7 +29,7 @@
   display: inline-flex;
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
-  background: rgba(250, 204, 21, 0.14);
+  background: rgba(241, 207, 0, 0.14);
   color: var(--color-rezende-primary);
   font-size: 0.8rem;
   font-weight: 800;
@@ -57,17 +57,17 @@
   width: fit-content;
   max-width: 100%;
   margin-top: 1rem;
-  border: 1px solid rgba(250, 204, 21, 0.42);
+  border: 1px solid rgba(241, 207, 0, 0.42);
   border-radius: 16px;
   background:
-    linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(250, 204, 21, 0.08)),
-    rgba(250, 204, 21, 0.06);
-  color: #facc15;
+    linear-gradient(135deg, rgba(241, 207, 0, 0.18), rgba(241, 207, 0, 0.08)),
+    rgba(241, 207, 0, 0.06);
+  color: #f1cf00;
   font-size: 0.98rem;
   font-weight: 900;
   line-height: 1.45;
   padding: 0.9rem 1rem;
-  box-shadow: 0 0 24px rgba(250, 204, 21, 0.12);
+  box-shadow: 0 0 24px rgba(241, 207, 0, 0.12);
 }
 
 .customer-draw-warning strong {
@@ -98,15 +98,15 @@
 }
 
 .customer-status-summary .validated {
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  color: #22c55e;
+  background: rgba(0, 144, 69, 0.12);
+  border: 1px solid rgba(0, 144, 69, 0.28);
+  color: #009045;
 }
 
 .customer-status-summary .drawn {
-  background: rgba(250, 204, 21, 0.14);
-  border: 1px solid rgba(250, 204, 21, 0.3);
-  color: #facc15;
+  background: rgba(241, 207, 0, 0.14);
+  border: 1px solid rgba(241, 207, 0, 0.3);
+  color: #f1cf00;
 }
 
 .customer-back-button {
@@ -117,9 +117,9 @@
 
 .customer-promo-invite {
   background:
-    linear-gradient(135deg, rgba(250, 204, 21, 0.14), rgba(34, 197, 94, 0.08)),
+    linear-gradient(135deg, rgba(241, 207, 0, 0.14), rgba(0, 144, 69, 0.08)),
     var(--color-rezende-white);
-  border: 1px solid rgba(250, 204, 21, 0.28);
+  border: 1px solid rgba(241, 207, 0, 0.28);
   border-radius: 24px;
   box-shadow: var(--shadow-card);
   padding: 1.35rem;
@@ -161,8 +161,8 @@
 }
 
 .customer-window-card.active {
-  border-color: rgba(250, 204, 21, 0.75);
-  box-shadow: 0 10px 40px rgba(250, 204, 21, 0.18);
+  border-color: rgba(241, 207, 0, 0.75);
+  box-shadow: 0 10px 40px rgba(241, 207, 0, 0.18);
 }
 
 .customer-window-card:not(.active):hover {
@@ -190,8 +190,8 @@
   min-width: 86px;
   padding: 0.55rem 0.75rem;
   border-radius: 999px;
-  background: rgba(250, 204, 21, 0.12);
-  border: 1px solid rgba(250, 204, 21, 0.24);
+  background: rgba(241, 207, 0, 0.12);
+  border: 1px solid rgba(241, 207, 0, 0.24);
   color: var(--color-rezende-secondary);
   font-size: 0.76rem;
   font-weight: 900;
@@ -199,7 +199,7 @@
 }
 
 .customer-window-button:focus-visible {
-  outline: 3px solid rgba(250, 204, 21, 0.55);
+  outline: 3px solid rgba(241, 207, 0, 0.55);
   outline-offset: 6px;
   border-radius: 12px;
 }
@@ -227,19 +227,19 @@
 
 .customer-stat-card--highlight {
   background:
-    linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(250, 204, 21, 0.14)),
+    linear-gradient(135deg, rgba(0, 144, 69, 0.08), rgba(241, 207, 0, 0.14)),
     var(--color-rezende-white);
 }
 
 .customer-stat-card--total {
   background:
-    linear-gradient(180deg, rgba(250, 204, 21, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(241, 207, 0, 0.08), transparent 34%),
     var(--color-rezende-white);
 }
 
 .customer-stat-card--validated {
   background:
-    linear-gradient(180deg, rgba(34, 197, 94, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(0, 144, 69, 0.08), transparent 34%),
     var(--color-rezende-white);
 }
 
@@ -276,17 +276,17 @@
 }
 
 .customer-summary-row.used {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(0, 144, 69, 0.1);
+  border-color: rgba(0, 144, 69, 0.3);
 }
 
 .customer-summary-row.drawn {
-  background: rgba(250, 204, 21, 0.12);
-  border-color: rgba(250, 204, 21, 0.4);
+  background: rgba(241, 207, 0, 0.12);
+  border-color: rgba(241, 207, 0, 0.4);
 }
 
 .customer-summary-row.drawn strong {
-  color: #facc15;
+  color: #f1cf00;
 }
 
 .customer-summary-row strong {
@@ -335,13 +335,13 @@
   border-radius: 999px;
   justify-content: center;
   align-items: center;
-  background: rgba(34, 197, 94, 0.12);
+  background: rgba(0, 144, 69, 0.12);
 }
 
 .customer-window-tab.active {
-  background: #facc15;
+  background: #f1cf00;
   color: #061a12;
-  box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+  box-shadow: 0 0 20px rgba(241, 207, 0, 0.3);
 }
 
 .customer-window-tab.active span {
@@ -379,7 +379,7 @@
   gap: 1rem;
   padding: 0.9rem 1rem;
   border-radius: 16px;
-  background: rgba(34, 197, 94, 0.08);
+  background: rgba(0, 144, 69, 0.08);
   border: 1px solid var(--color-border);
 }
 
@@ -403,9 +403,9 @@
 }
 
 .customer-selection-actions .customer-select-all-button {
-  background: rgba(34, 197, 94, 0.16);
-  border-color: rgba(34, 197, 94, 0.36);
-  color: #22c55e;
+  background: rgba(0, 144, 69, 0.16);
+  border-color: rgba(0, 144, 69, 0.36);
+  color: #009045;
 }
 
 .customer-selection-actions .customer-clear-selection-button {
@@ -450,21 +450,21 @@
 
 .customer-coupon-card.selected {
   border: 2px solid var(--color-rezende-secondary);
-  box-shadow: 0 0 20px rgba(250, 204, 21, 0.24);
+  box-shadow: 0 0 20px rgba(241, 207, 0, 0.24);
 }
 
 .customer-coupon-card.used {
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(255, 255, 255, 0.02));
+  background: linear-gradient(180deg, rgba(0, 144, 69, 0.12), rgba(255, 255, 255, 0.02));
 }
 
 .customer-coupon-card.drawn {
-  border-color: rgba(250, 204, 21, 0.72);
+  border-color: rgba(241, 207, 0, 0.72);
   background:
-    linear-gradient(180deg, rgba(250, 204, 21, 0.18), rgba(34, 197, 94, 0.08) 34%, rgba(255, 255, 255, 0.02)),
+    linear-gradient(180deg, rgba(241, 207, 0, 0.18), rgba(0, 144, 69, 0.08) 34%, rgba(255, 255, 255, 0.02)),
     #121e1a;
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.18),
-    0 0 30px rgba(250, 204, 21, 0.24),
+    0 0 0 1px rgba(241, 207, 0, 0.18),
+    0 0 30px rgba(241, 207, 0, 0.24),
     0 18px 36px rgba(0, 0, 0, 0.34);
 }
 
@@ -474,7 +474,7 @@
   right: -3.35rem;
   width: 13.5rem;
   transform: rotate(38deg);
-  background: #22c55e;
+  background: #009045;
   color: #061a12;
   padding: 0.36rem 0;
   text-align: center;
@@ -482,7 +482,7 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.22);
+  box-shadow: 0 8px 20px rgba(0, 144, 69, 0.22);
   z-index: 2;
   white-space: nowrap;
 }
@@ -494,22 +494,22 @@
 }
 
 .customer-validated-ribbon.drawn {
-  background: linear-gradient(90deg, #facc15, #fde047, #facc15);
+  background: linear-gradient(90deg, #f1cf00, #fde047, #f1cf00);
   color: #061a12;
-  box-shadow: 0 8px 24px rgba(250, 204, 21, 0.24);
+  box-shadow: 0 8px 24px rgba(241, 207, 0, 0.24);
 }
 
 .customer-status-badge.drawn {
-  background: rgba(250, 204, 21, 0.16);
-  color: #facc15;
-  border: 1px solid rgba(250, 204, 21, 0.34);
+  background: rgba(241, 207, 0, 0.16);
+  color: #f1cf00;
+  border: 1px solid rgba(241, 207, 0, 0.34);
 }
 
 .customer-drawn-alert {
   display: grid;
   gap: 0.25rem;
-  background: rgba(250, 204, 21, 0.12);
-  border: 1px solid rgba(250, 204, 21, 0.28);
+  background: rgba(241, 207, 0, 0.12);
+  border: 1px solid rgba(241, 207, 0, 0.28);
   border-radius: 16px;
   color: var(--color-rezende-secondary);
   font-weight: 800;
@@ -523,9 +523,9 @@
 
 .customer-participating-alert {
   border-radius: 14px;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.26);
-  color: #22c55e;
+  background: rgba(0, 144, 69, 0.1);
+  border: 1px solid rgba(0, 144, 69, 0.26);
+  color: #009045;
   font-size: 0.86rem;
   font-weight: 900;
   padding: 0.75rem 0.85rem;
@@ -536,9 +536,9 @@
   width: fit-content;
   max-width: 100%;
   border-radius: 999px;
-  background: rgba(250, 204, 21, 0.18);
-  border: 1px solid rgba(250, 204, 21, 0.36);
-  color: #facc15;
+  background: rgba(241, 207, 0, 0.18);
+  border: 1px solid rgba(241, 207, 0, 0.36);
+  color: #f1cf00;
   font-size: 0.95rem;
   font-weight: 900;
   padding: 0.45rem 0.7rem;
@@ -603,9 +603,9 @@
 }
 
 .customer-status-badge.used {
-  background: rgba(34, 197, 94, 0.12);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.24);
+  background: rgba(0, 144, 69, 0.12);
+  color: #009045;
+  border: 1px solid rgba(0, 144, 69, 0.24);
 }
 
 .customer-coupon-details {
@@ -615,7 +615,7 @@
 }
 
 .customer-coupon-details div {
-  background: rgba(34, 197, 94, 0.08);
+  background: rgba(0, 144, 69, 0.08);
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 0.85rem;
@@ -638,7 +638,7 @@
 
 .customer-receipt {
   background: #f8faf8;
-  border: 1px dashed rgba(34, 197, 94, 0.32);
+  border: 1px dashed rgba(0, 144, 69, 0.32);
   border-radius: 12px;
   padding: 1rem;
   color: #182233;
@@ -698,8 +698,8 @@
   width: fit-content;
   max-width: 100%;
   border-radius: 999px;
-  background: rgba(250, 204, 21, 0.16);
-  border: 1px solid rgba(250, 204, 21, 0.34);
+  background: rgba(241, 207, 0, 0.16);
+  border: 1px solid rgba(241, 207, 0, 0.34);
   color: #b45309;
   font-size: 0.95rem;
   font-weight: 900;
@@ -707,7 +707,7 @@
 }
 
 .customer-receipt-footer {
-  border-top: 1px dashed rgba(34, 197, 94, 0.25);
+  border-top: 1px dashed rgba(0, 144, 69, 0.25);
   padding-top: 0.75rem;
   display: flex;
   justify-content: space-between;
@@ -729,13 +729,13 @@
 
 .customer-empty-state--celebration {
   background:
-    linear-gradient(180deg, rgba(250, 204, 21, 0.12), transparent 35%),
+    linear-gradient(180deg, rgba(241, 207, 0, 0.12), transparent 35%),
     var(--color-rezende-white);
 }
 
 .customer-empty-state--soft {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(34, 197, 94, 0.22);
+  border: 1px dashed rgba(0, 144, 69, 0.22);
   box-shadow: none;
   margin-top: 1rem;
 }
@@ -811,3 +811,4 @@
     flex-direction: column;
   }
 }
+
