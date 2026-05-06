@@ -84,7 +84,7 @@ body {
 .header-content {
   position: relative;
   z-index: 1;
-  max-width: 780px;
+  max-width: 1120px;
   margin: 0 auto;
 }
 
@@ -98,9 +98,9 @@ body {
 
 .header-campaign-logo img {
   display: block;
-  width: min(720px, 92vw);
+  width: min(980px, 96vw);
   height: auto;
-  max-height: 380px;
+  max-height: 560px;
   object-fit: contain;
   filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.32));
 }
@@ -417,7 +417,12 @@ body {
 
 @media (max-width: 700px) {
   .header {
-    padding: 3rem 1rem 3.4rem;
+    padding: 2.4rem 0.65rem 2.6rem;
+  }
+
+  .header-campaign-logo img {
+    width: 98vw;
+    max-height: 310px;
   }
 
   .main-content {

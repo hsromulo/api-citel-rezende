@@ -497,10 +497,6 @@ function App() {
           <div className="header-campaign-logo">
             <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
           </div>
-          <p>
-            Informe seu CPF, confirme a pergunta da campanha e autentique seus
-            cupons com segurança.
-          </p>
         </div>
       </header>
 
