@@ -595,6 +595,15 @@ Antes do sorteio:
 4. Confirmar que ha autorizacao/regulamento aplicavel.
 5. Exportar ou registrar evidencias previas, se exigido.
 
+Checklist rapido pre-sorteio:
+
+- [ ] Backend respondendo `/health`;
+- [ ] sincronizacao mais recente conferida;
+- [ ] total de cupons validados conferido;
+- [ ] item/premio correto selecionado;
+- [ ] usuario administrador correto logado;
+- [ ] evidencias previas registradas, quando aplicavel.
+
 Durante o sorteio:
 
 1. Acessar `?admin=1`.
