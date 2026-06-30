@@ -2,7 +2,7 @@ services:
   - type: web
     name: projeto-qrcode-sync-api
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./infra/docker/Dockerfile
     envVars:
       - key: DB_HOST
         sync: false

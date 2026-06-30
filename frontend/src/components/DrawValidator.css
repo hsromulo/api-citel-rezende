@@ -3,7 +3,7 @@
   max-width: 1080px;
   background: var(--color-rezende-white);
   border: 1px solid var(--color-border);
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: var(--spacing-lg);
 }
@@ -42,7 +42,7 @@
   width: 100%;
   background: #0b1713;
   border: 2px solid var(--color-rezende-light);
-  border-radius: 16px;
+  border-radius: var(--radius-control);
   color: var(--color-rezende-dark);
   font: inherit;
   font-weight: 700;
@@ -78,7 +78,7 @@
 
 .draw-validator__result {
   border: 1px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   margin-top: var(--spacing-lg);
   padding: var(--spacing-md);
 }
@@ -139,7 +139,7 @@
 .draw-validator__winner pre {
   background: #07140f;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   color: var(--color-rezende-secondary);
   margin-top: 0.7rem;
   overflow: auto;

@@ -156,7 +156,7 @@ O sistema nao cobre, por si so:
 
 Arquivo principal:
 
-- `main.py`
+- `backend/main.py`
 
 Funcoes/endpoints relevantes:
 
@@ -170,8 +170,8 @@ Funcoes/endpoints relevantes:
 
 ### Frontend administrativo
 
-- `src/components/CouponList.tsx`
-- `src/components/CouponList.css`
+- `frontend/src/components/CouponList.tsx`
+- `frontend/src/components/CouponList.css`
 
 Responsavel por:
 
@@ -184,10 +184,10 @@ Responsavel por:
 
 ### Frontend cliente
 
-- `src/App.tsx`
-- `src/components/AuthForm.tsx`
-- `src/components/CustomerCouponList.tsx`
-- `src/services/supabaseService.ts`
+- `frontend/src/App.tsx`
+- `frontend/src/components/AuthForm.tsx`
+- `frontend/src/components/CustomerCouponList.tsx`
+- `frontend/src/services/supabaseService.ts`
 
 Responsavel por:
 
@@ -198,8 +198,8 @@ Responsavel por:
 
 ### Validador publico
 
-- `src/components/DrawValidator.tsx`
-- `src/components/DrawValidator.css`
+- `frontend/src/components/DrawValidator.tsx`
+- `frontend/src/components/DrawValidator.css`
 
 Responsavel por:
 

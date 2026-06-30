@@ -239,13 +239,13 @@ const CustomerCouponList: React.FC<CustomerCouponListProps> = ({
 
     return (
       <article key={coupon.id} className={`customer-summary-row ${statusClass}`}>
-      <div>
-        <span className="customer-coupon-label">Cupom</span>
-        <strong>{coupon.code}</strong>
-        <small>{coupon.documentNumber || '-'}</small>
-      </div>
-      {renderStatusBadge(coupon)}
-    </article>
+        <div>
+          <span className="customer-coupon-label">Cupom</span>
+          <strong>{coupon.code}</strong>
+          <small>{coupon.documentNumber || '-'}</small>
+        </div>
+        {renderStatusBadge(coupon)}
+      </article>
     );
   };
 

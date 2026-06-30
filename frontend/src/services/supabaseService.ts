@@ -46,11 +46,16 @@ export type CustomerCouponLookup = {
   coupons: CustomerCoupon[];
   customerName?: string;
   customerCode?: string;
+  cpf?: string;
+  customer_code?: string;
+  customer_name?: string;
+  cupons_disponiveis?: number;
+  total_faturamento?: number;
   source: 'validation' | 'mock' | 'supabase';
 };
 
 const useLocalTestCoupons = false;
-const useClientCouponSummaryFallback = false;
+const useClientCouponSummaryFallback = true;
 
 export const formatCPF = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -248,7 +253,13 @@ const buildMockCoupons = (cpf: string): CustomerCoupon[] => {
   ];
 };
 
-const buildSyncedCoupons = (cpf: string, couponCount: number): CustomerCoupon[] => {
+const buildSyncedCoupons = (
+  cpf: string,
+  couponCount: number,
+  customerCode?: string | null,
+  customerName?: string | null,
+  totalFaturamento?: number | null
+): CustomerCoupon[] => {
   const suffix = cpf.slice(-4);
   const safeCouponCount = Math.max(0, Math.floor(couponCount));
 
@@ -263,8 +274,8 @@ const buildSyncedCoupons = (cpf: string, couponCount: number): CustomerCoupon[] 
       companyName: 'Rezende',
       documentNumber: `AUTCOM-${suffix}-${couponNumber}`,
       documentType: 'AUTCOM',
-      customerCode: null,
-      customerName: null,
+      customerCode: customerCode ?? null,
+      customerName: customerName ?? null,
       sellerCode: null,
       sellerName: null,
       customerPhone: null,
@@ -272,7 +283,7 @@ const buildSyncedCoupons = (cpf: string, couponCount: number): CustomerCoupon[] 
       customerAddress: null,
       customerNeighborhood: null,
       customerZipcode: null,
-      documentAmount: null,
+      documentAmount: totalFaturamento ?? null,
       saleDate: null,
       saleTime: null,
       createdAt: null,
@@ -578,7 +589,7 @@ export const validateCoupon = async (
         return {
           success: false,
           message:
-            'O banco bloqueou este cupom por uma restricao antiga. Rode o SQL fix_validations_unique_coupon.sql no Supabase e tente novamente.',
+            'O banco bloqueou este cupom por uma restricao antiga. Rode o SQL backend/sql/fix_validations_unique_coupon.sql no Supabase e tente novamente.',
         };
       }
 
@@ -707,9 +718,16 @@ export const getCouponsByCpf = async (cpf: string): Promise<CustomerCouponLookup
     .maybeSingle();
 
   if (!clientCouponError && clientCoupon) {
+    const customerCode = String(clientCoupon.customer_code ?? '');
+    const customerName = String(clientCoupon.customer_name ?? '');
+    const availableCoupons = Number(clientCoupon.cupons_disponiveis ?? 0);
+    const totalRevenue = Number(clientCoupon.total_faturamento ?? 0);
     const coupons = buildSyncedCoupons(
       cleanCpf,
-      Number(clientCoupon.cupons_disponiveis ?? 0)
+      availableCoupons,
+      customerCode,
+      customerName,
+      totalRevenue
     );
 
     if (coupons.length === 0) {
@@ -718,8 +736,13 @@ export const getCouponsByCpf = async (cpf: string): Promise<CustomerCouponLookup
         message:
           'Você ainda não possui cupons nesta promoção. Compre produtos participantes para entrar na promoção e aumentar suas chances no sorteio.',
         coupons: [] as CustomerCoupon[],
-        customerName: String(clientCoupon.customer_name ?? ''),
-        customerCode: String(clientCoupon.customer_code ?? ''),
+        customerName,
+        customerCode,
+        cpf: cleanCpf,
+        customer_code: customerCode,
+        customer_name: customerName,
+        cupons_disponiveis: availableCoupons,
+        total_faturamento: totalRevenue,
         source: 'supabase' as const,
       };
     }
@@ -730,6 +753,13 @@ export const getCouponsByCpf = async (cpf: string): Promise<CustomerCouponLookup
     return {
       success: true,
       coupons: couponsWithValidationStatus,
+      customerName,
+      customerCode,
+      cpf: cleanCpf,
+      customer_code: customerCode,
+      customer_name: customerName,
+      cupons_disponiveis: availableCoupons,
+      total_faturamento: totalRevenue,
       source: 'supabase' as const,
     };
   }

@@ -33,7 +33,7 @@ async function createTable() {
       console.log('❌ Erro ao criar tabela via RPC. Use o painel do Supabase.');
       console.log('📋 Vá para: https://supabase.com/dashboard/project/tgxhpskqcphlkbrrwubr');
       console.log('📋 Menu: SQL Editor > New Query');
-      console.log('📋 Cole e execute o SQL do arquivo create_coupons_table.sql');
+      console.log('📋 Cole e execute o SQL do arquivo backend/sql/create_coupons_table.sql');
       return;
     }
 
@@ -76,7 +76,7 @@ async function createTable() {
     console.log('📋 SOLUÇÃO: Execute manualmente no painel do Supabase');
     console.log('📋 URL: https://supabase.com/dashboard/project/tgxhpskqcphlkbrrwubr');
     console.log('📋 Vá em SQL Editor > New Query');
-    console.log('📋 Cole o conteúdo do arquivo create_coupons_table.sql');
+    console.log('📋 Cole o conteúdo do arquivo backend/sql/create_coupons_table.sql');
   }
 }
 

@@ -278,7 +278,7 @@ export default function CouponList({ onBack }: CouponListProps) {
         console.warn('Nao foi possivel buscar historico de sorteios:', error);
         setListMessage(
           isMissingDrawTableError(error)
-            ? 'A janela de sorteios ainda não foi criada no Supabase. Os sorteios aparecem temporariamente nesta máquina. Para salvar definitivo, execute o SQL create_draws_table.sql no Supabase.'
+            ? 'A janela de sorteios ainda não foi criada no Supabase. Os sorteios aparecem temporariamente nesta máquina. Para salvar definitivo, execute o SQL backend/sql/create_draws_table.sql no Supabase.'
             : `Erro ao buscar sorteios salvos: ${error.message}`
         );
       }

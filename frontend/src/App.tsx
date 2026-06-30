@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import './App.css';
+import './styles/App.css';
 import ValidationResult from './components/ValidationResult';
 import AuthForm from './components/AuthForm';
 import CustomerCouponList from './components/CustomerCouponList';
@@ -255,7 +255,7 @@ function App() {
 
     if (questionAnswer !== 'rezende-palmeira') {
       setQuestionError(
-        'Resposta incorreta. Para continuar, marque "Rezende Construção e Palmeira Tintas".'
+        'Resposta incorreta. Para continuar, marque "Rezende Construção".'
       );
       return;
     }
@@ -438,7 +438,7 @@ function App() {
         <header className="header">
           <div className="header-content">
             <div className="header-campaign-logo">
-              <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
+              <img src="/Seleção dos Heróis.png" alt="Seleção dos Heróis" />
             </div>
             <h1>Validador de Sorteio</h1>
             <p>
@@ -461,7 +461,7 @@ function App() {
         <header className="header">
           <div className="header-content">
             <div className="header-campaign-logo">
-              <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
+              <img src="/Seleção dos Heróis.png" alt="Seleção dos Heróis" />
             </div>
             <h1>Validações e Sorteios</h1>
             <p>Consulte, exporte e sorteie os cupons autenticados da promoção.</p>
@@ -495,7 +495,7 @@ function App() {
       <header className="header">
         <div className="header-content">
           <div className="header-campaign-logo">
-            <img src="/selecao-herois-logo-oficial.svg" alt="Seleção dos Heróis" />
+            <img src="/Seleção dos Heróis.png" alt="Seleção dos Heróis" />
           </div>
         </div>
       </header>
@@ -557,8 +557,7 @@ function App() {
             <div className="modal-badge">Antes de continuar</div>
             <h2>Confirme sua participação</h2>
             <p>
-              Quais são as empresas que sorteiam prêmios incríveis para os
-              clientes?
+              Qual empresa sorteia prêmios incríveis para os clientes?
             </p>
 
             <label
@@ -576,7 +575,7 @@ function App() {
                   setQuestionError('');
                 }}
               />
-              <span>Rezende Construção e Palmeira Tintas</span>
+              <span>Rezende Construção</span>
             </label>
 
             <label

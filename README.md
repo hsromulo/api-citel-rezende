@@ -70,7 +70,7 @@ npm run dev
 ## 📱 Estrutura do Projeto
 
 ```
-src/
+frontend/src/
 ├── components/
 │   ├── AuthForm.tsx         # Formulário de autenticação manual
 │   ├── AuthForm.css

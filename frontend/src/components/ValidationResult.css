@@ -9,7 +9,7 @@
 
 .result-card {
   background: var(--color-rezende-white);
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--color-border);
@@ -75,7 +75,7 @@
 .coupon-details {
   background-color: var(--color-rezende-light);
   padding: var(--spacing-md);
-  border-radius: 18px;
+  border-radius: var(--radius-card);
   margin-bottom: var(--spacing-lg);
 }
 
@@ -95,7 +95,7 @@
 .code {
   background-color: var(--color-rezende-white);
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   font-family: 'Courier New', monospace;
   font-weight: 700;
   color: var(--color-rezende-secondary);
