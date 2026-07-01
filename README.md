@@ -1,184 +1,196 @@
-# Validador de QR Code - Rezende Materiais para Construção
+# Projeto QR Code - Selecao dos Herois
 
-Um sistema moderno e responsivo para validação de cupons da promoção Rezende, com autenticação manual e leitura de QR Code.
+Aplicacao para consulta, validacao e administracao de cupons da promocao
+Selecao dos Herois. O frontend roda em Vite/React e o backend e uma API
+FastAPI usada para sincronizacao Autcom/Citel, sorteios e consultas auxiliares.
 
-## 🎯 Funcionalidades
+## URLs de producao
 
-- ✅ **Autenticação Manual** - Formulário com CPF, código do cupom e número do documento
-- ✅ **Leitor de QR Code** - Acessa a câmera do celular para escanear cupons
-- ✅ **Validação em Tempo Real** - Conecta ao Supabase para validar cupons
-- ✅ **Lista Administrativa** - Visualização de cupons validados (requer login)
-- ✅ **Design Responsivo** - Otimizado para dispositivos móveis
-- ✅ **Cores Rezende** - Interface com a identidade visual corporativa
-- ✅ **PWA Ready** - Funciona offline e instalável como app
+- Frontend: `https://projeto-qrcode-two.vercel.app`
+- Backend/API: `https://api-citel-rezende-2.onrender.com`
 
-## 🚀 Fluxo do Usuário
+Nao publique alteracoes sem validar localmente e sem uma janela planejada de
+deploy.
 
-1. **Cliente recebe QR Code** que direciona para o site
-2. **Preenche formulário** com:
-   - CPF (com máscara automática)
-   - Código do cupom
-   - Número do documento fiscal
-3. **Clica em "Autenticar Cupom"**
-4. **Recebe resultado** da validação
-5. **Administradores** podem fazer login para ver lista de cupons validados
+## Como rodar localmente
 
-## 🚀 Início Rápido
+### Requisitos
 
-### Pré-requisitos
-- Node.js 16+
-- npm ou yarn
+- Node.js 18+
+- npm
+- Python 3.11+
 
-### Instalação
+### Frontend
 
-1. Clone o repositório:
-```bash
-git clone seu-repo
-cd projeto-qrcode
-```
+1. Instale as dependencias:
 
-2. Instale as dependências:
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente:
-```bash
-cp .env.example .env
+2. Configure variaveis locais do frontend em `.env.local` ou
+   `frontend/.env.local`:
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_SYNC_API_URL=
+VITE_SUPABASE_COUPONS_TABLE=
 ```
 
-Adicione suas credenciais Supabase no arquivo `.env`:
-```
-VITE_SUPABASE_URL=sua_url_supabase
-VITE_SUPABASE_ANON_KEY=sua_chave_anon
-```
+3. Rode o servidor local:
 
-4. Inicie o servidor de desenvolvimento:
 ```bash
 npm run dev
 ```
 
-5. Abra [http://localhost:3000](http://localhost:3000) no seu navegador
+4. Abra:
 
-## 🛠️ Scripts Disponíveis
-
-- `npm run dev` - Inicia servidor de desenvolvimento
-- `npm run build` - Cria build otimizado para produção
-- `npm run preview` - Visualiza o build de produção
-- `npm run lint` - Executa linter do projeto
-
-## 📱 Estrutura do Projeto
-
-```
-frontend/src/
-├── components/
-│   ├── AuthForm.tsx         # Formulário de autenticação manual
-│   ├── AuthForm.css
-│   ├── QRScanner.tsx        # Leitor de QR Code
-│   ├── QRScanner.css
-│   ├── ValidationResult.tsx # Resultado da validação
-│   ├── ValidationResult.css
-│   ├── CouponList.tsx       # Lista de cupons validados
-│   ├── CouponList.css
-│   ├── Login.tsx            # Formulário de login admin
-│   └── Login.css
-├── services/
-│   └── supabaseService.ts   # Integração com Supabase
-├── App.tsx                  # Componente principal
-├── App.css                  # Estilos globais com cores Rezende
-├── main.tsx                 # Ponto de entrada
-└── vite-env.d.ts            # Tipos do Vite
+```txt
+http://localhost:3000
 ```
 
-## 🎨 Paleta de Cores Rezende
+### Backend
 
-- **Azul Escuro (Primary)**: `#003d7a` - Confiança e profissionalismo
-- **Azul Corporativo (Secondary)**: `#0066cc` - Destaque
-- **Laranja (Accent)**: `#ff6b35` - Energia e dinamismo
-- **Cinza Claro**: `#f5f5f5` - Fundo
-- **Branco**: `#ffffff` - Base
+1. Crie e ative um ambiente Python, se desejar.
+2. Instale as dependencias:
 
-## 🔧 Configuração do Supabase
-
-### Tabela: `coupons`
-
-```sql
-CREATE TABLE coupons (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code VARCHAR(255) UNIQUE NOT NULL,
-  discount_percentage DECIMAL(5,2) NOT NULL,
-  category VARCHAR(255),
-  expiry_date TIMESTAMP NOT NULL,
-  is_used BOOLEAN DEFAULT FALSE,
-  used_at TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+```bash
+pip install -r backend/requirements.txt
 ```
 
-## 📖 Documentação
+3. Configure as variaveis de ambiente do backend:
 
-### AuthForm Component
+```env
+DB_BACKEND=
+MYSQL_HOST=
+MYSQL_PORT=
+MYSQL_USER=
+MYSQL_PASS=
+MYSQL_DB=
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASS=
+DB_NAME=
+SUPABASE_URL=
+SUPABASE_KEY=
+SUPABASE_SERVICE_KEY=
+SYNK_TOKEN=
+CITEL_SALES_TABLE=
+CITEL_CLIENT_TABLE=
+CITEL_MOVEMENT_TABLE=
+CITEL_SELLER_TABLE=
+```
 
-Formulário principal para autenticação manual de cupons.
+4. Rode a API localmente:
 
-Props:
-- `onAuthenticate: (data) => void` - Callback com dados do formulário
-- `onScanQR: () => void` - Callback para alternar para scanner QR
-- `loading?: boolean` - Estado de carregamento
+```bash
+uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
 
-Campos:
-- **CPF** - Com máscara automática (000.000.000-00)
-- **Código do Cupom** - Campo texto obrigatório
-- **Número do Documento** - Campo texto obrigatório
+## Validacoes locais
 
-### QRScanner Component
+Antes de qualquer deploy, rode:
 
-Componente responsável pelo acesso à câmera e leitura de QR Codes.
+```bash
+npm run build
+npx tsc --noEmit
+python -m compileall -q backend
+npm run dev
+```
 
-Props:
-- `onScanned: (code: string) => void` - Callback ao detectar código
-- `onCancel: () => void` - Callback para cancelar leitura
+O `npm run dev` deve ser usado apenas para teste local.
 
-### ValidationResult Component
+## Como fazer deploy
 
-Exibe resultado da validação do cupom.
+### Vercel
 
-Props:
-- `couponData: CouponData` - Dados do cupom validado
-- `onScanAgain: () => void` - Escanear novo cupom
-- `onHome: () => void` - Voltar ao início
+O frontend usa Vite. Os arquivos que precisam ficar na raiz para o Vercel sao:
 
-### supabaseService
+- `package.json`
+- `package-lock.json`
+- `vite.config.ts`
+- `vercel.json`
+- `tsconfig.json`
+- `tsconfig.node.json`
 
-Funções para validação de cupons:
+Configuracao atual em `vercel.json`:
 
-- `validateCoupon(code: string)` - Valida um cupom
-- `markCouponAsUsed(couponId: string)` - Marca cupom como usado
+- framework: `vite`
+- build command: `npm run build`
+- output directory: `dist`
 
-## 🌐 Navegadores Suportados
+Deploy manual, somente quando autorizado:
 
-- Chrome/Chromium 90+
-- Safari 14+
-- Firefox 88+
-- Edge 90+
+```bash
+vercel --prod --yes
+```
 
-## � Fluxo de Autenticação
+### Render
 
-### Para Clientes:
-1. Recebem QR Code que direciona para o site
-2. Preenchem CPF, código do cupom e número do documento
-3. Clicam em "Autenticar Cupom"
-4. Recebem confirmação de validação
+O Render usa `render.yaml` na raiz. O backend Docker aponta para:
 
-### Para Administradores:
-1. Clicam no botão "Admin" no header
-2. Fazem login com email e senha
-3. Visualizam lista completa de cupons validados
-4. Podem fazer logout a qualquer momento
+```txt
+infra/docker/Dockerfile
+```
 
-## ⚠️ Notas Importantes
+O Dockerfile copia `backend/` e inicia:
 
-- O sistema requer conexão com Supabase para funcionar
-- A validação de cupons marca automaticamente como "usado"
-- Apenas administradores logados podem ver a lista de cupons validados
-- O formulário de CPF inclui validação de formato brasileiro
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}
+```
+
+## Estrutura do projeto
+
+```txt
+projeto-qrcode/
+├─ backend/
+│  ├─ api/
+│  │  ├─ columns.py
+│  │  ├─ draw.py
+│  │  ├─ health.py
+│  │  └─ sync.py
+│  ├─ config/
+│  ├─ database/
+│  ├─ queries/
+│  ├─ services/
+│  ├─ sql/
+│  ├─ utils/
+│  ├─ main.py
+│  └─ requirements.txt
+├─ frontend/
+│  ├─ public/
+│  ├─ index.html
+│  └─ src/
+│     ├─ assets/
+│     ├─ components/
+│     │  ├─ auth/
+│     │  ├─ coupons/
+│     │  ├─ draw/
+│     │  ├─ layout/
+│     │  └─ qr/
+│     ├─ services/
+│     ├─ styles/
+│     ├─ App.tsx
+│     └─ main.tsx
+├─ docs/
+├─ scripts/
+├─ config/
+├─ infra/
+│  └─ docker/
+├─ .env.example
+├─ package.json
+├─ render.yaml
+├─ vercel.json
+├─ vite.config.ts
+└─ README.md
+```
+
+## Observacoes de manutencao
+
+- `node_modules/`, `dist/`, `__pycache__/`, `*.pyc` e `*.tsbuildinfo` nao devem ser versionados.
+- Nao commitar `.env`, `.env.local`, `.env.vercel` ou chaves reais.
+- Queries SQL do backend ficam em `backend/queries/`.
+- Scripts SQL de Supabase ficam em `backend/sql/`.
+- Endpoints FastAPI ficam em `backend/api/`; os caminhos publicos das rotas devem ser preservados.

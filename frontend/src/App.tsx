@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import './styles/App.css';
-import ValidationResult from './components/ValidationResult';
-import AuthForm from './components/AuthForm';
-import CustomerCouponList from './components/CustomerCouponList';
-import CouponList from './components/CouponList';
-import DrawValidator from './components/DrawValidator';
-import Login from './components/Login';
+import AuthForm from './components/auth/AuthForm';
+import Login from './components/auth/Login';
+import CouponList from './components/coupons/CouponList';
+import CustomerCouponList from './components/coupons/CustomerCouponList';
+import ValidationResult from './components/coupons/ValidationResult';
+import DrawValidator from './components/draw/DrawValidator';
 import {
   getCurrentUser,
   CustomerCoupon,

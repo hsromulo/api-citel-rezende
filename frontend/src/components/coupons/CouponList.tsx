@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
-import { formatCPF, supabase } from '../services/supabaseService';
+import { formatCPF, supabase } from '../../services/supabaseService';
 import * as XLSX from 'xlsx';
 import './CouponList.css';
 

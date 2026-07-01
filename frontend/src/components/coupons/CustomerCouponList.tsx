@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import './CustomerCouponList.css';
-import { CustomerCoupon, formatCPF } from '../services/supabaseService';
+import { CustomerCoupon, formatCPF } from '../../services/supabaseService';
 
 type CouponWindow = 'available' | 'validated' | 'total';
 

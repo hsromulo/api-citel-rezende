@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './AuthForm.css';
-import { formatCPF } from '../services/supabaseService';
+import { formatCPF } from '../../services/supabaseService';
 
 interface AuthFormProps {
   onAuthenticate: (cpf: string) => void;
